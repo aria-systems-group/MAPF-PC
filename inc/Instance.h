@@ -70,11 +70,16 @@ public:
 
 	int getDefaultNumberOfAgents() const { return num_of_agents; }
 
-  // should be moved to private
-  // vector<TemporalEdge> temporal_cons;
-  // temporal_cons[i * num_of_agents + j] = [{k, l}]
-  // The k-th task of i should happens before the l-th task of j
-  vector<vector<pair<int, int>> > temporal_cons;
+  // // should be moved to private
+  // // vector<TemporalEdge> temporal_cons;
+  // // temporal_cons[i * num_of_agents + j] = [{k, l}]
+  // // The k-th task of i should happens before the l-th task of j
+  // vector<vector<pair<int, int>> > temporal_cons;
+
+	// JK: Moving to CBSNode in an attempt to turn this CBS Tree implementation into a CBS Forest
+	// Moving temporal constraints to the nodes would (i think) give me the power to change the constraints
+	//	each time I have a new root node. 
+	// I think the temporal constraints will need to be copied from parent
 
 protected:
 	// int moves_offset[MOVE_COUNT];

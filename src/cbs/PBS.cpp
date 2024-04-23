@@ -101,19 +101,20 @@ CBS(instance, false, heuristics_type::ZERO, screen)
         initial_priorities.push_back({task2id({i, j - 1}), task2id({i, j}), -1, -1, constraint_type::GPRIORITY});
       }
     }
-  for (int i = 0; i < instance.temporal_cons.size(); i++){
-    if (instance.temporal_cons[i].empty()){
-      continue;
-    }
-    int from_agent = i / num_of_agents;
-    int to_agent = i % num_of_agents;
-    for (auto landmarks: instance.temporal_cons[i]){
-      int from_landmark = landmarks.first;
-      int to_landmark = landmarks.second;
-      cout << "add " << from_agent << "(" << from_landmark << ") " << to_agent << "(" << to_landmark << ")" << endl; 
-      initial_priorities.push_back({task2id({from_agent, from_landmark}), task2id({to_agent, to_landmark}), -1, -1, constraint_type::GPRIORITY});
-    }
-  }
+  // JK: Commenting out because I am not interested in using PBS
+  // for (int i = 0; i < instance.temporal_cons.size(); i++){
+  //   if (instance.temporal_cons[i].empty()){
+  //     continue;
+  //   }
+  //   int from_agent = i / num_of_agents;
+  //   int to_agent = i % num_of_agents;
+  //   for (auto landmarks: instance.temporal_cons[i]){
+  //     int from_landmark = landmarks.first;
+  //     int to_landmark = landmarks.second;
+  //     cout << "add " << from_agent << "(" << from_landmark << ") " << to_agent << "(" << to_landmark << ")" << endl; 
+  //     initial_priorities.push_back({task2id({from_agent, from_landmark}), task2id({to_agent, to_landmark}), -1, -1, constraint_type::GPRIORITY});
+  //   }
+  // }
 
   num_of_tasks = id2task.size();
 

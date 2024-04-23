@@ -69,8 +69,8 @@ void CBS::copyConflicts(const list<shared_ptr<Conflict >>& conflicts,
 
 void CBS::findConflicts(CBSNode& curr, int a1, int a2)
 {
-
-  for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
+  for (auto cons: curr.temporal_cons[a1 * num_of_agents + a2]) { // JK: changed temporal_cons to be member of CBSNode
+  // for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
     auto from_landmark = cons.first;
     auto to_landmark = cons.second;
     if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
@@ -80,7 +80,8 @@ void CBS::findConflicts(CBSNode& curr, int a1, int a2)
       curr.conflicts.push_back(conflict);
     }
   }
-  for (auto cons: search_engines[0]->instance.temporal_cons[a2 * num_of_agents + a1]){
+  for (auto cons: curr.temporal_cons[a2 * num_of_agents + a1]) { // JK: changed temporal_cons to be member of CBSNode
+  // for (auto cons: search_engines[0]->instance.temporal_cons[a2 * num_of_agents + a1]){
     auto from_landmark = cons.first;
     auto to_landmark = cons.second;
     if (paths[a2]->timestamps[from_landmark] >= paths[a1]->timestamps[to_landmark]){
@@ -510,6 +511,8 @@ bool CBS::generateChild(CBSNode* node, CBSNode* parent)
 {
   clock_t t1 = clock();
   node->parent = parent;
+  // JK: Need to copy temporal_cons from parent to new child nodes
+  node->temporal_cons = node->parent->temporal_cons;
   node->g_val = parent->g_val;
   node->makespan = parent->makespan;
   node->depth = parent->depth + 1;
@@ -1273,7 +1276,8 @@ bool CBS::validateSolution() const
     for (int a2 = 0; a2 < num_of_agents; a2++)
     {
       if (a1 == a2){continue;}
-      for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
+      for (auto cons: goal_node->temporal_cons[a1 * num_of_agents + a2]){ // JK: changed temporal_cons to be member of CBSNode
+      // for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
         auto from_landmark = cons.first;
         auto to_landmark = cons.second;
         if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){

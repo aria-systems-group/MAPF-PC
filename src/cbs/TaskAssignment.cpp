@@ -230,17 +230,18 @@ void TaskAssignment::find_greedy_plan(){
 
   }
 
-  temporal_cons.clear();
-  temporal_cons.resize(num_of_agents * num_of_agents);
-  for (auto dependence: temporal_dependecies){
-    int task_i, task_j, agent_i, i, agent_j, j;
-    std::tie(task_i, task_j) = dependence;
-    std::tie(agent_i, i) = task_to_agent_and_index[task_i];
-    std::tie(agent_j, j) = task_to_agent_and_index[task_j];
-    assert(agent_i >= 0 && agent_j >= 0);
-    cout << "temporal dep " << agent_i << "(" <<i << ") -> " << agent_j << "(" <<j << ")" << endl;
-    temporal_cons[agent_i * num_of_agents + agent_j].push_back({i,j});
-  }
+  // JK: commented out because I am not interested in this task assignment
+  // temporal_cons.clear(); 
+  // temporal_cons.resize(num_of_agents * num_of_agents);
+  // for (auto dependence: temporal_dependecies){
+  //   int task_i, task_j, agent_i, i, agent_j, j;
+  //   std::tie(task_i, task_j) = dependence;
+  //   std::tie(agent_i, i) = task_to_agent_and_index[task_i];
+  //   std::tie(agent_j, j) = task_to_agent_and_index[task_j];
+  //   assert(agent_i >= 0 && agent_j >= 0);
+  //   cout << "temporal dep " << agent_i << "(" <<i << ") -> " << agent_j << "(" <<j << ")" << endl;
+    // temporal_cons[agent_i * num_of_agents + agent_j].push_back({i,j});
+  // }
 }
 
 

@@ -294,7 +294,7 @@ bool Instance::loadAgents()
 		}
   start_locations.resize(num_of_agents);
   goal_locations.resize(num_of_agents);
-  temporal_cons.resize(num_of_agents * num_of_agents);
+  // temporal_cons.resize(num_of_agents * num_of_agents); JK: Commenting out because I want this data to live in CBSNode
 
   char_separator<char> sep("\t");
   for (int i = 0; i < num_of_agents; i++)
@@ -342,12 +342,12 @@ bool Instance::loadAgents()
 			int to_agent = atoi((*beg).c_str());
       beg++;
 			int to_landmark = atoi((*beg).c_str());
-      if (from_agent < num_of_agents && to_agent < num_of_agents){
-        cout << from_agent << ": " << from_landmark << " -> " << to_agent << ": " << to_landmark << endl;
-        temporal_cons[from_agent * num_of_agents +to_agent].push_back({from_landmark, to_landmark});
-      } else{
-        // cout << "temporal edge not considered" << endl ;
-      }
+      // if (from_agent < num_of_agents && to_agent < num_of_agents){
+      //   cout << from_agent << ": " << from_landmark << " -> " << to_agent << ": " << to_landmark << endl;
+      //   temporal_cons[from_agent * num_of_agents +to_agent].push_back({from_landmark, to_landmark});
+      // } else{
+      //   // cout << "temporal edge not considered" << endl ;
+      // }
     }
 
   }

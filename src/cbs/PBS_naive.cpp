@@ -241,24 +241,24 @@ void PBS_naive::build_ct(ConstraintTable& ct, int agent, vector<vector<int>> adj
       cout <<  i  << ", ";
 
 
-
-      for (auto cons: search_engines[0]->instance.temporal_cons[agent * num_of_agents + i]){
-        auto from_landmark = cons.first;
-        auto to_landmark = cons.second;
-        // if (ct.leq_goal_time[from_landmark] == -1){
-        //   ct.leq_goal_time[from_landmark] = paths[i] ->timestamps[to_landmark] - 1;
-        // }else{
-          ct.leq_goal_time[from_landmark] = min(ct.leq_goal_time[from_landmark], paths[i] ->timestamps[to_landmark] - 1);
-          // }
-        // if (paths[agent]->timestamps[from_landmark] >= paths[i]->timestamps[to_landmark]){
-      }
-      for (auto cons: search_engines[0]->instance.temporal_cons[i * num_of_agents + agent]){
-        auto from_landmark = cons.first;
-        auto to_landmark = cons.second;
-        ct.g_goal_time[to_landmark] = max(ct.g_goal_time[to_landmark], paths[i] ->timestamps[from_landmark]);
-        ct.length_min = max(ct.length_min, paths[i] ->timestamps[from_landmark] + 1);
-        // if (paths[i]->timestamps[from_landmark] >= paths[agent]->timestamps[to_landmark]){
-      }
+      // JK: Commenting out because I am not interested in using PBS-Naive
+      // for (auto cons: search_engines[0]->instance.temporal_cons[agent * num_of_agents + i]){
+      //   auto from_landmark = cons.first;
+      //   auto to_landmark = cons.second;
+      //   // if (ct.leq_goal_time[from_landmark] == -1){
+      //   //   ct.leq_goal_time[from_landmark] = paths[i] ->timestamps[to_landmark] - 1;
+      //   // }else{
+      //     ct.leq_goal_time[from_landmark] = min(ct.leq_goal_time[from_landmark], paths[i] ->timestamps[to_landmark] - 1);
+      //     // }
+      //   // if (paths[agent]->timestamps[from_landmark] >= paths[i]->timestamps[to_landmark]){
+      // }
+      // for (auto cons: search_engines[0]->instance.temporal_cons[i * num_of_agents + agent]){
+      //   auto from_landmark = cons.first;
+      //   auto to_landmark = cons.second;
+      //   ct.g_goal_time[to_landmark] = max(ct.g_goal_time[to_landmark], paths[i] ->timestamps[from_landmark]);
+      //   ct.length_min = max(ct.length_min, paths[i] ->timestamps[from_landmark] + 1);
+      //   // if (paths[i]->timestamps[from_landmark] >= paths[agent]->timestamps[to_landmark]){
+      // }
     }
   }
   cout << endl;
@@ -549,27 +549,28 @@ shared_ptr<Conflict> PBS_naive::chooseConflict(const CBSNode& node) const {
 
 bool PBS_naive::findOneConflict(int a1, int a2){
 
-  
-  for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
-    auto from_landmark = cons.first;
-    auto to_landmark = cons.second;
-    if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
-      // cout << "Temporal conflict between " << a1  << "(" << from_landmark<< ")" << " and " << a2 << "(" << to_landmark<< ")" << endl;
-      shared_ptr<Conflict> conflict(new Conflict());
-      conflict->temporalConflict(a1, a2, from_landmark, to_landmark, paths[a1]->timestamps[from_landmark], paths[a2]->timestamps[to_landmark]);
-      return true;
-    }
-  }
-  for (auto cons: search_engines[0]->instance.temporal_cons[a2 * num_of_agents + a1]){
-    auto from_landmark = cons.first;
-    auto to_landmark = cons.second;
-    if (paths[a2]->timestamps[from_landmark] >= paths[a1]->timestamps[to_landmark]){
-      // cout << "Temporal conflict between " << a2  << "(" << from_landmark<< ")" << " and " << a1 << "(" << to_landmark<< ")" << endl;
-      shared_ptr<Conflict> conflict(new Conflict());
-      conflict->temporalConflict(a2, a1, from_landmark, to_landmark, paths[a2]->timestamps[from_landmark], paths[a1]->timestamps[to_landmark]);
-      return true;
-    }
-  }
+  // JK: Commenting out because I am not interested in using PBS-Naive
+  // for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
+  //   auto from_landmark = cons.first;
+  //   auto to_landmark = cons.second;
+  //   if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
+  //     // cout << "Temporal conflict between " << a1  << "(" << from_landmark<< ")" << " and " << a2 << "(" << to_landmark<< ")" << endl;
+  //     shared_ptr<Conflict> conflict(new Conflict());
+  //     conflict->temporalConflict(a1, a2, from_landmark, to_landmark, paths[a1]->timestamps[from_landmark], paths[a2]->timestamps[to_landmark]);
+  //     return true;
+  //   }
+  // }
+  // JK: Commenting out because I am not interested in using PBS-Naive
+  // for (auto cons: search_engines[0]->instance.temporal_cons[a2 * num_of_agents + a1]){
+  //   auto from_landmark = cons.first;
+  //   auto to_landmark = cons.second;
+  //   if (paths[a2]->timestamps[from_landmark] >= paths[a1]->timestamps[to_landmark]){
+  //     // cout << "Temporal conflict between " << a2  << "(" << from_landmark<< ")" << " and " << a1 << "(" << to_landmark<< ")" << endl;
+  //     shared_ptr<Conflict> conflict(new Conflict());
+  //     conflict->temporalConflict(a2, a1, from_landmark, to_landmark, paths[a2]->timestamps[from_landmark], paths[a1]->timestamps[to_landmark]);
+  //     return true;
+  //   }
+  // }
 
   assert(paths[a1] != nullptr && !paths[a1]->empty());
   assert(paths[a2] != nullptr && !paths[a2]->empty());

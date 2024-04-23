@@ -45,7 +45,8 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
       if (a1 == a2){
         continue;
       }
-      for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
+      for (auto cons: root->temporal_cons[a1 * num_of_agents + a2]){ // JK: changed temporal_cons to be member of CBSNode
+      // for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
         auto from_landmark = cons.first;
         auto to_landmark = cons.second;
 

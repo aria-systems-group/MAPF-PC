@@ -56,6 +56,13 @@ public:
 	list<pair<int, Path>> paths; // new paths
 	list<Constraint> constraints; // new constraints
 
+
+	// JK: see instance for details on why this is here 
+  	// vector<TemporalEdge> temporal_cons;
+  	// temporal_cons[i * num_of_agents + j] = [{k, l}]
+  	// The k-th task of i should happens before the l-th task of j
+  	vector<vector<pair<int, int>> > temporal_cons;
+
   bool is_solution = false;
 
 	int g_val;
