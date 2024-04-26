@@ -6,6 +6,32 @@
 
 int RANDOM_WALK_STEPS = 100000;
 
+// JK: My constructor
+Instance::Instance(const int num_agents, const int num_cols, const int num_rows, const std::vector<int>& obstacles)
+{
+	num_of_agents = num_agents;
+	num_of_cols = num_cols;
+	num_of_rows = num_rows;
+	start_locations.resize(num_of_agents);
+	map_size = num_of_cols * num_of_rows;
+
+	// fill my_map with obstacles
+	my_map.resize(map_size, false);
+	for (const int& o : obstacles)
+	{
+		bool succ = addObstacle(o);
+		if (!succ)
+			throw std::runtime_error("Unable to create obstacle!");
+	}
+	// JK: moved goal_locations to CBSNode for my planning framework
+	// goal_locations.resize(num_of_agents);
+}
+
+void Instance::SetStartForAgentIndex(int idx, int start)
+{
+	start_locations[idx] = start;
+}
+
 Instance::Instance(const string& map_fname, const string& agent_fname,
 				   int num_of_agents, int num_of_rows, int num_of_cols, int num_of_obstacles, int warehouse_width) :
 		map_fname(map_fname), agent_fname(agent_fname), num_of_agents(num_of_agents)
@@ -293,7 +319,8 @@ bool Instance::loadAgents()
 			exit(-1);
 		}
   start_locations.resize(num_of_agents);
-  goal_locations.resize(num_of_agents);
+  // JK: removing this line because goal_locations are now with CBSNode
+  // goal_locations.resize(num_of_agents);
   // temporal_cons.resize(num_of_agents * num_of_agents); JK: Commenting out because I want this data to live in CBSNode
 
   char_separator<char> sep("\t");
@@ -313,17 +340,18 @@ bool Instance::loadAgents()
       auto row = atoi((*beg).c_str());
 
       start_locations[i] = linearizeCoordinate(row, col);
-      goal_locations[i].resize(num_landmarks);
-		 //  getline(myfile, line);
-		 //  tokenizer<char_separator<char>> tok_landmakrs(line, sep);
-		 //  tokenizer<char_separator<char>>::iterator beg_landmarks = tok_landmakrs.begin();
-     for (int j = 0; j < num_landmarks; j++){
-        beg++;
-        col = atoi((*beg).c_str());
-        beg++;
-        row = atoi((*beg).c_str());
-        goal_locations[i][j] = linearizeCoordinate(row, col);
-      }
+      // JK: Changing these lines because goal_locations is no with CBSNode
+      // goal_locations[i].resize(num_landmarks);
+		 // //  getline(myfile, line);
+		 // //  tokenizer<char_separator<char>> tok_landmakrs(line, sep);
+		 // //  tokenizer<char_separator<char>>::iterator beg_landmarks = tok_landmakrs.begin();
+     // for (int j = 0; j < num_landmarks; j++){
+     //    beg++;
+     //    col = atoi((*beg).c_str());
+     //    beg++;
+     //    row = atoi((*beg).c_str());
+     //    goal_locations[i][j] = linearizeCoordinate(row, col);
+     //  }
 		}
 
   getline(myfile, line);
@@ -362,11 +390,15 @@ void Instance::printAgents() const
 {
 	for (int i = 0; i < num_of_agents; i++)
 	{
+		// JK: removing these lines because the goals can change throughout planning
 		cout << "Agent" << i << " : S=(" << getRowCoordinate(start_locations[i]) << "," << getColCoordinate(start_locations[i])
-			 << ") ; 0: (" << getRowCoordinate(goal_locations[i][0]) << "," << getColCoordinate(goal_locations[i][0]) << ")" ;
-    for (int j = 1; j < goal_locations[i].size(); j++){
-      cout << " =>" << j << ": (" << getRowCoordinate(goal_locations[i][j]) << "," << getColCoordinate(goal_locations[i][j]) << ")" ;
-    }
+			 << ")";
+		// cout << "Agent" << i << " : S=(" << getRowCoordinate(start_locations[i]) << "," << getColCoordinate(start_locations[i])
+		// 	 << ") ; 0: (" << getRowCoordinate(goal_locations[i][0]) << "," << getColCoordinate(goal_locations[i][0]) << ")" ;
+    
+    // for (int j = 1; j < goal_locations[i].size(); j++){
+      // cout << " =>" << j << ": (" << getRowCoordinate(goal_locations[i][j]) << "," << getColCoordinate(goal_locations[i][j]) << ")" ;
+    // }
     cout << endl;
 	}
 }
@@ -383,11 +415,13 @@ void Instance::saveAgents() const
 	}
 	myfile << num_of_agents << endl;
 	for (int i = 0; i < num_of_agents; i++){
-		myfile << getRowCoordinate(start_locations[i]) << "," << getColCoordinate(start_locations[i]) << "," << goal_locations[i].size() << endl;
+		// JK: changing these lines because the goals can change throughout planning
+		myfile << getRowCoordinate(start_locations[i]) << "," << getColCoordinate(start_locations[i]) << "," << endl;
+		// myfile << getRowCoordinate(start_locations[i]) << "," << getColCoordinate(start_locations[i]) << "," << goal_locations[i].size() << endl;
 
-    for (auto g:goal_locations[i]){
-      cout << getRowCoordinate(g) << "," << getColCoordinate(g) << "," ;
-    }
+    // for (auto g:goal_locations[i]){
+    //   cout << getRowCoordinate(g) << "," << getColCoordinate(g) << "," ;
+    // }
   }
   cout << endl;
 	myfile.close();

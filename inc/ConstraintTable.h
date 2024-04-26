@@ -3,7 +3,7 @@
 #include "common.h"
 #include "CBSNode.h"
 
-
+class CBSNode;
 class ConstraintTable
 {
 public:

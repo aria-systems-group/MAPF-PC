@@ -220,63 +220,64 @@ bool PBS_naive::solve(double time_limit, int cost_lowerbound, int cost_upperboun
 
 void PBS_naive::build_ct(ConstraintTable& ct, int agent, vector<vector<int>> adj_list_r){
 
-  int num_of_stops = search_engines[agent]->goal_location.size();
-  ct.leq_goal_time.resize(num_of_stops, INT_MAX);
-  ct.g_goal_time.resize(num_of_stops, -1);
+  // JK: commenting out because it breaks my changes and I do not care to use PBS
+  // int num_of_stops = search_engines[agent]->goal_location.size();
+  // ct.leq_goal_time.resize(num_of_stops, INT_MAX);
+  // ct.g_goal_time.resize(num_of_stops, -1);
 
-  ct.num_col = search_engines[0]->instance.num_of_cols; 
-  ct.map_size = search_engines[0]->instance.map_size;
-  ct.goal_location = search_engines[agent]->goal_location.back();
+  // ct.num_col = search_engines[0]->instance.num_of_cols; 
+  // ct.map_size = search_engines[0]->instance.map_size;
+  // ct.goal_location = search_engines[agent]->goal_location.back();
 
-  auto high_prio_agents = reachable_set(agent, adj_list_r);
-  high_prio_agents.erase(agent);
+  // auto high_prio_agents = reachable_set(agent, adj_list_r);
+  // high_prio_agents.erase(agent);
 
-  //TODO remove later
-  cout << "hard cons: ";
-  for (int i = 0; i < num_of_agents; i++){
-    if (high_prio_agents.find(i) != high_prio_agents.end()){
-      // int agent, task;
-      ct.addPath(*paths[i], true);
+  // //TODO remove later
+  // cout << "hard cons: ";
+  // for (int i = 0; i < num_of_agents; i++){
+  //   if (high_prio_agents.find(i) != high_prio_agents.end()){
+  //     // int agent, task;
+  //     ct.addPath(*paths[i], true);
 
-      cout <<  i  << ", ";
+  //     cout <<  i  << ", ";
 
 
-      // JK: Commenting out because I am not interested in using PBS-Naive
-      // for (auto cons: search_engines[0]->instance.temporal_cons[agent * num_of_agents + i]){
-      //   auto from_landmark = cons.first;
-      //   auto to_landmark = cons.second;
-      //   // if (ct.leq_goal_time[from_landmark] == -1){
-      //   //   ct.leq_goal_time[from_landmark] = paths[i] ->timestamps[to_landmark] - 1;
-      //   // }else{
-      //     ct.leq_goal_time[from_landmark] = min(ct.leq_goal_time[from_landmark], paths[i] ->timestamps[to_landmark] - 1);
-      //     // }
-      //   // if (paths[agent]->timestamps[from_landmark] >= paths[i]->timestamps[to_landmark]){
-      // }
-      // for (auto cons: search_engines[0]->instance.temporal_cons[i * num_of_agents + agent]){
-      //   auto from_landmark = cons.first;
-      //   auto to_landmark = cons.second;
-      //   ct.g_goal_time[to_landmark] = max(ct.g_goal_time[to_landmark], paths[i] ->timestamps[from_landmark]);
-      //   ct.length_min = max(ct.length_min, paths[i] ->timestamps[from_landmark] + 1);
-      //   // if (paths[i]->timestamps[from_landmark] >= paths[agent]->timestamps[to_landmark]){
-      // }
-    }
-  }
-  cout << endl;
-  // cout << "soft cons: ";
-  // for (int i = 0; i < num_of_tasks; i++){
-  //   if (high_prio_agents.find(i) == high_prio_agents.end() && paths[i] != nullptr && !paths[i]->empty()){
-  //     auto task = id2task[i];
-  //     cout << "(" << task.first << ", " << task.second << ") ";
+  //     // JK: Commenting out because I am not interested in using PBS-Naive
+  //     // for (auto cons: search_engines[0]->instance.temporal_cons[agent * num_of_agents + i]){
+  //     //   auto from_landmark = cons.first;
+  //     //   auto to_landmark = cons.second;
+  //     //   // if (ct.leq_goal_time[from_landmark] == -1){
+  //     //   //   ct.leq_goal_time[from_landmark] = paths[i] ->timestamps[to_landmark] - 1;
+  //     //   // }else{
+  //     //     ct.leq_goal_time[from_landmark] = min(ct.leq_goal_time[from_landmark], paths[i] ->timestamps[to_landmark] - 1);
+  //     //     // }
+  //     //   // if (paths[agent]->timestamps[from_landmark] >= paths[i]->timestamps[to_landmark]){
+  //     // }
+  //     // for (auto cons: search_engines[0]->instance.temporal_cons[i * num_of_agents + agent]){
+  //     //   auto from_landmark = cons.first;
+  //     //   auto to_landmark = cons.second;
+  //     //   ct.g_goal_time[to_landmark] = max(ct.g_goal_time[to_landmark], paths[i] ->timestamps[from_landmark]);
+  //     //   ct.length_min = max(ct.length_min, paths[i] ->timestamps[from_landmark] + 1);
+  //     //   // if (paths[i]->timestamps[from_landmark] >= paths[agent]->timestamps[to_landmark]){
+  //     // }
   //   }
   // }
   // cout << endl;
+  // // cout << "soft cons: ";
+  // // for (int i = 0; i < num_of_tasks; i++){
+  // //   if (high_prio_agents.find(i) == high_prio_agents.end() && paths[i] != nullptr && !paths[i]->empty()){
+  // //     auto task = id2task[i];
+  // //     cout << "(" << task.first << ", " << task.second << ") ";
+  // //   }
+  // // }
+  // // cout << endl;
 
-  // // temporal cons
-  // for (auto precedent: temporal_adj_list_r[task_id]){
-  //   assert(!paths[precedent]->empty());
-  //   ct.length_min = max(ct.length_min, paths[precedent]->end_time() + 1);
-  // }
-  // ct.latest_timestep = max(ct.latest_timestep, ct.length_min);
+  // // // temporal cons
+  // // for (auto precedent: temporal_adj_list_r[task_id]){
+  // //   assert(!paths[precedent]->empty());
+  // //   ct.length_min = max(ct.length_min, paths[precedent]->end_time() + 1);
+  // // }
+  // // ct.latest_timestep = max(ct.latest_timestep, ct.length_min);
 
 }
 

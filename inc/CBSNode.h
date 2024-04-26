@@ -2,9 +2,11 @@
 
 #include "common.h"
 #include "Conflict.h"
+#include "ConstraintTable.h"
 
 enum node_selection { NODE_RANDOM, NODE_H, NODE_DEPTH, NODE_CONFLICTS, NODE_CONFLICTPAIRS, NODE_MVC };
 
+class ConstraintTable;
 class CBSNode
 {
 public:
@@ -57,13 +59,16 @@ public:
 	list<Constraint> constraints; // new constraints
 
 
-	// JK: see instance for details on why this is here 
+	// JK: see instance for details on why these are here 
   	// vector<TemporalEdge> temporal_cons;
   	// temporal_cons[i * num_of_agents + j] = [{k, l}]
   	// The k-th task of i should happens before the l-th task of j
   	vector<vector<pair<int, int>> > temporal_cons;
+  	vector<vector<int>> goal_locations; // system goals
+  	vector<ConstraintTable> initial_constraints; // see CBS constructor for details on how this should be set
+  	int helpers_idx = -1; // this is set during root node setup -- provides a pointer to the correct helper based on the what tree its in
 
-  bool is_solution = false;
+  	bool is_solution = false;
 
 	int g_val;
 	int h_val;

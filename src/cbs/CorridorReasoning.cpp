@@ -137,17 +137,21 @@ shared_ptr<Conflict> CorridorReasoning::findCorridorConflict(const shared_ptr<Co
 	int corridor_length = getCorridorLength(*paths[a[0]], t[0], u[1], edge);
 	int t3, t3_, t4, t4_;
 	ConstraintTable ct1(initial_constraints[a[0]]);
-	ct1.build(node, a[0], search_engines[a[0]]->goal_location.size());
-	t3 = search_engines[a[0]]->getTravelTime(paths[a[0]]->front().location, u[1], ct1, MAX_TIMESTEP);
+	// JK: changing this line to account for my changes
+	ct1.build(node, a[0], node.goal_locations[a[0]].size());
+	// ct1.build(node, a[0], search_engines[a[0]]->goal_location.size());
+	t3 = search_engines[a[0]]->getTravelTime(paths[a[0]]->front().location, u[1], ct1, MAX_TIMESTEP, node.goal_locations[a[0]]);
 	ct1.insert2CT(edge.first, edge.second, 0, MAX_TIMESTEP); // block the corridor in both directions
 	ct1.insert2CT(edge.second, edge.first, 0, MAX_TIMESTEP);
-	t3_ = search_engines[a[0]]->getTravelTime(paths[a[0]]->front().location, u[1], ct1, t3 + 2 * corridor_length + 1);
+	t3_ = search_engines[a[0]]->getTravelTime(paths[a[0]]->front().location, u[1], ct1, t3 + 2 * corridor_length + 1, node.goal_locations[a[0]]);
 	ConstraintTable ct2(initial_constraints[a[1]]);
-	ct2.build(node, a[1], search_engines[a[1]]->goal_location.size());
-	t4 = search_engines[a[1]]->getTravelTime(paths[a[1]]->front().location, u[0], ct2, MAX_TIMESTEP);
+	// JK: changing this line to account for my changes
+	ct2.build(node, a[1], node.goal_locations[a[1]].size());
+	// ct2.build(node, a[1], search_engines[a[1]]->goal_location.size());
+	t4 = search_engines[a[1]]->getTravelTime(paths[a[1]]->front().location, u[0], ct2, MAX_TIMESTEP, node.goal_locations[a[1]]);
 	ct2.insert2CT(edge.first, edge.second, 0, MAX_TIMESTEP); // block the corridor in both directions
 	ct2.insert2CT(edge.second, edge.first, 0, MAX_TIMESTEP);
-	t4_ = search_engines[a[1]]->getTravelTime(paths[a[1]]->front().location, u[0], ct2, t3 + corridor_length + 1);
+	t4_ = search_engines[a[1]]->getTravelTime(paths[a[1]]->front().location, u[0], ct2, t3 + corridor_length + 1, node.goal_locations[a[1]]);
 
 	if (abs(t3 - t4) <= corridor_length && t3_ > t3 && t4_ > t4)
 	{

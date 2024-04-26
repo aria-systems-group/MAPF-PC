@@ -44,7 +44,7 @@ public:
 	vector<list<MDDNode*>> flatten_levels;
 
 	bool buildMDD(const ConstraintTable& ct,
-				  int num_of_levels, const SingleAgentSolver* solver);
+				  int num_of_levels, const SingleAgentSolver* solver, CBSNode& node, int id);
 
 
   void flattenMDD();
@@ -63,6 +63,7 @@ public:
 	MDD() = default;
 	MDD(const MDD& cpy);
 	~MDD();
+	vector<int> goal_locations; // JK: buildMDD updates this with CBSNode
 };
 
 std::ostream& operator<<(std::ostream& os, const MDD& mdd);

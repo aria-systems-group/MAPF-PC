@@ -8,7 +8,7 @@
 
 // takes the paths_found_initially and UPDATE all (constrained) paths found for agents from curr to start
 // also, do the same for ll_min_f_vals and paths_costs (since its already "on the way").
-inline void CBS::updatePaths(CBSNode* curr)
+void CBS::updatePaths(CBSNode* curr)
 {
   for (int i = 0; i < num_of_agents; i++)
     paths[i] = &paths_found_initially[i];
@@ -492,7 +492,9 @@ bool CBS::findPathForSingleAgent(CBSNode* node, int ag, int lowerbound)
       const Instance* instance = & search_engines[0]->instance;
       cout << "planning for agent " << ag << endl;
       for (int j = 0; j < new_path.timestamps.size(); j++){
-        cout << "(" << instance->getRowCoordinate(search_engines[ag]->goal_location[j]) << ", " << instance->getColCoordinate(search_engines[ag]->goal_location[j]) << ")@" << new_path.timestamps[j];
+        // JK: Changing line since CBSNode now holds goal locations
+        cout << "(" << instance->getRowCoordinate(node->goal_locations[ag][j]) << ", " << instance->getColCoordinate(node->goal_locations[ag][j]) << ")@" << new_path.timestamps[j];
+        // cout << "(" << instance->getRowCoordinate(search_engines[ag]->goal_location[j]) << ", " << instance->getColCoordinate(search_engines[ag]->goal_location[j]) << ")@" << new_path.timestamps[j];
         cout << "->";
       }
       cout << endl;
@@ -659,18 +661,22 @@ void CBS::printPaths() const
        paths[i]->size() - 1 << "): ";
 
     for (int t = 0; t < paths[i]->size(); t++){
-      cout << "(" << instance->getRowCoordinate(paths[i]->at(t).location) << ", " << instance->getColCoordinate(paths[i]->at(t).location) << ")@" << t;
+      cout << "(" << instance->getColCoordinate(paths[i]->at(t).location) << ", " << instance->getRowCoordinate(paths[i]->at(t).location) << ")@" << t;
       if (paths[i]->at(t).is_goal){
         cout << "*";
       }
       cout << "->";
     }
     cout << endl;
-    for (int j = 0; j < paths[i]->timestamps.size(); j++){
-      cout << "(" << instance->getRowCoordinate(search_engines[i]->goal_location[j]) << ", " << instance->getColCoordinate(search_engines[i]->goal_location[j]) << ")@" << paths[i]->timestamps[j];
-      cout << "->";
+    // JK: changed this bc we reassigned the responsibility to CBSNode
+    if (goal_node)
+    {
+      for (int j = 0; j < paths[i]->timestamps.size(); j++){
+        cout << "(" << instance->getColCoordinate(goal_node->goal_locations[i][j]) << ", " << instance->getRowCoordinate(goal_node->goal_locations[i][j]) << ")@" << paths[i]->timestamps[j];
+        cout << "->";
+      }
+      cout << endl;
     }
-    cout << endl;
   }
 }
 
@@ -1108,15 +1114,15 @@ CBS::CBS(vector<SingleAgentSolver*>& search_engines,
 CBS::CBS(const Instance& instance, bool sipp, heuristics_type heuristic, int screen) :
     screen(screen), focal_w(1),
     num_of_agents(instance.getDefaultNumberOfAgents()),
-    mdd_helper(initial_constraints, search_engines),
-    stp_helper(initial_constraints, search_engines),
+    mdd_helper({}, search_engines),
+    stp_helper({}, search_engines),
     rectangle_helper(instance),
-    mutex_helper(instance, initial_constraints),
-    corridor_helper(search_engines, initial_constraints)
+    mutex_helper(instance, {}),
+    corridor_helper(search_engines, {})
 {
   clock_t t = clock();
-  initial_constraints.resize(num_of_agents,
-                 ConstraintTable(instance.num_of_cols, instance.map_size));
+  // initial_constraints.resize(num_of_agents,
+                 // ConstraintTable(instance.num_of_cols, instance.map_size));
 
   search_engines.resize(num_of_agents);
   for (int i = 0; i < num_of_agents; i++)
@@ -1129,7 +1135,8 @@ CBS::CBS(const Instance& instance, bool sipp, heuristics_type heuristic, int scr
       search_engines[i] = new MultiLabelSpaceTimeAStar(instance, i);
     }
 
-    initial_constraints[i].goal_location = search_engines[i]->goal_location.back();
+    // JK: removing line since CBSNode now holds goal locations this -- not sure if needed or not
+    // initial_constraints[i].goal_location = search_engines[i]->goal_location.back();
   }
   runtime_preprocessing = (double) (clock() - t) / CLOCKS_PER_SEC;
 
@@ -1326,7 +1333,7 @@ bool CBS::validateSolution() const
   return true;
 }
 
-inline int CBS::getAgentLocation(int agent_id, size_t timestep) const
+int CBS::getAgentLocation(int agent_id, size_t timestep) const
 {
   size_t t = max(min(timestep, paths[agent_id]->size() - 1), (size_t) 0);
   return paths[agent_id]->at(t).location;

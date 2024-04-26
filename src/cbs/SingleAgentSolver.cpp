@@ -8,8 +8,8 @@ list<int> SingleAgentSolver::getNextLocations(int curr) const // including itsel
 	return rst;
 }
 
-
-void SingleAgentSolver::compute_heuristics()
+// JK: This is a TO-DO
+void SingleAgentSolver::compute_heuristics(const vector<int>& goals)
 {
 	struct Node
 	{
@@ -30,17 +30,16 @@ void SingleAgentSolver::compute_heuristics()
 		};  // used by OPEN (heap) to compare nodes (top of the heap has min f-val, and then highest g-val)
 	};
 
-  my_heuristic.resize(goal_location.size());
-  heuristic_landmark.resize(goal_location.size(), 0);
+  my_heuristic.resize(goals.size());
+  heuristic_landmark.resize(goals.size(), 0);
 
-  for (int i = 0; i < goal_location.size(); i++){
+  for (int i = 0; i < goals.size(); i++){
     my_heuristic[i].resize(instance.map_size, MAX_TIMESTEP);
 
     // generate a heap that can save nodes (and a open_handle)
     boost::heap::pairing_heap<Node, boost::heap::compare<Node::compare_node>> heap;
-
-    Node root(goal_location[i], 0);
-    my_heuristic[i][goal_location[i]] = 0;
+    Node root(goals[i], 0);
+    my_heuristic[i][goals[i]] = 0;
     heap.push(root);  // add root to heap
     while (!heap.empty())
       {
@@ -59,8 +58,8 @@ void SingleAgentSolver::compute_heuristics()
   }
 
 
-  for (int i = goal_location.size() - 2; i >= 0; i--){
-    heuristic_landmark[i] = heuristic_landmark[i + 1] + my_heuristic[i + 1][goal_location[i]];
+  for (int i = goals.size() - 2; i >= 0; i--){
+    heuristic_landmark[i] = heuristic_landmark[i + 1] + my_heuristic[i + 1][goals[i]];
   }
 
 }

@@ -65,7 +65,7 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   // Runs the algorithm until the problem is solved or time is exhausted
-  bool solve(double time_limit, int cost_lowerbound = 0, int cost_upperbound = MAX_COST);
+  virtual bool solve(double time_limit, int cost_lowerbound = 0, int cost_upperbound = MAX_COST);
 
   CBS(const Instance& instance, bool sipp, heuristics_type heuristic, int screen);
   CBS(vector<SingleAgentSolver*>& search_engines,
@@ -79,6 +79,7 @@ public:
 
   void clear(); // used for rapid random  restart
 
+  // JK: Assigning this responsibility to CBSNode
   vector<ConstraintTable> initial_constraints;
 
 protected:
@@ -126,7 +127,7 @@ protected:
   void init_heuristic(heuristics_type heuristic);
 
   // high level search
-  bool findPathForSingleAgent(CBSNode* node, int ag, int lower_bound = 0);
+  virtual bool findPathForSingleAgent(CBSNode* node, int ag, int lower_bound = 0);
   virtual bool generateChild(CBSNode* child, CBSNode* curr);
   virtual bool generateRoot();
 
@@ -145,7 +146,7 @@ protected:
   void computePriorityForConflict(Conflict& conflict, CBSNode& node);
 
   //update information
-  inline void updatePaths(CBSNode* curr);
+  void updatePaths(CBSNode* curr);
   void updateFocalList();
   inline void releaseNodes();
   //inline void releaseMDDTable();
@@ -157,6 +158,7 @@ protected:
   void printConflicts(const CBSNode& curr) const;
 
   bool validateSolution() const;
-  inline int getAgentLocation(int agent_id, size_t timestep) const;
-  inline void pushNode(CBSNode* node);
+  int getAgentLocation(int agent_id, size_t timestep) const;
+  void pushNode(CBSNode* node);
+
 };

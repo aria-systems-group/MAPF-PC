@@ -150,7 +150,7 @@ public:
 	double runtime_build_CAT = 0; // runtime of building conflict avoidance table
 
 	int start_location;
-	vector<int> goal_location;
+	// vector<int> goal_location; // JK: Assigned goal responsibilities to CBSNode
   vector<int> heuristic_landmark;
 	vector<vector<int>> my_heuristic;  // this is the precomputed heuristic for this agent
   int get_heuristic(int stage, int loc) const{
@@ -166,8 +166,8 @@ public:
 
 	virtual Path findPath(const CBSNode& node, const ConstraintTable& initial_constraints,
 						  const vector<Path*>& paths, int agent, int lower_bound) = 0;
-	virtual Path findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound) = 0;
-	virtual int getTravelTime(int start, int end, const ConstraintTable& constraint_table, int upper_bound) = 0;
+	virtual Path findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound, const vector<int>& goals) = 0;
+	virtual int getTravelTime(int start, int end, const ConstraintTable& constraint_table, int upper_bound, const vector<int>& goals) = 0;
 	virtual string getName() const = 0;
 
 	list<int> getNextLocations(int curr) const; // including itself and its neighbors
@@ -178,19 +178,19 @@ public:
 
 	SingleAgentSolver(const Instance& instance, int agent) :
 		instance(instance), //agent(agent), 
-		start_location(instance.start_locations[agent]),
-		goal_location(instance.goal_locations[agent])
+		start_location(instance.start_locations[agent])
+		// goal_location(instance.goal_locations[agent])
 	{
-		compute_heuristics();
+		// compute_heuristics();
 	}
 
 	virtual ~SingleAgentSolver() {}
 
   bool use_timestamps = true;
 
+  void compute_heuristics(const vector<int>& goals);
 
 protected:
-	void compute_heuristics();
 
 	int get_DH_heuristic(int from, int to) const { return abs(my_heuristic[0][from] - my_heuristic[0][to]); }
 };

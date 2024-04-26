@@ -20,13 +20,13 @@
 }*/
 
 bool MDD::buildMDD(const ConstraintTable& ct,
-				   int num_of_levels, const SingleAgentSolver* solver)
+				   int num_of_levels, const SingleAgentSolver* solver, CBSNode& node, int id)
 {
-  vector<int> f_ub(solver->goal_location.size(), INT_MAX);
-  if (ct.leq_goal_time[solver->goal_location.size() - 1] != -1){
-    f_ub.back() = ct.leq_goal_time[solver->goal_location.size() - 1];
+  vector<int> f_ub(node.goal_locations[id].size(), INT_MAX);
+  if (ct.leq_goal_time[node.goal_locations[id].size() - 1] != -1){
+    f_ub.back() = ct.leq_goal_time[node.goal_locations[id].size() - 1];
   }
-  for (int i = (int) solver->goal_location.size() - 2; i >= 0; i--){
+  for (int i = (int) node.goal_locations[id].size() - 2; i >= 0; i--){
     if (ct.leq_goal_time[i] != -1){
       f_ub[i] = min(f_ub[i + 1], ct.leq_goal_time[i] + solver->heuristic_landmark[i]);
     }else{
@@ -66,7 +66,7 @@ bool MDD::buildMDD(const ConstraintTable& ct,
 
 
 
-      if (next_location == solver->goal_location[stage] && stage < solver->goal_location.size() - 1 && ct.g_goal_time[stage] < curr->level + 1){
+      if (next_location == node.goal_locations[id][stage] && stage < node.goal_locations[id].size() - 1 && ct.g_goal_time[stage] < curr->level + 1){
         stage += 1;
       }
 
@@ -426,7 +426,7 @@ MDDNode* MDD::goalAt(int level)
 
 	for (MDDNode* ptr: levels[level])
 	{
-		if (ptr->location == solver->goal_location.back() && ptr->cost == level)
+		if (ptr->location == this->goal_locations.back() && ptr->cost == level)
 		{
 			return ptr;
 		}
@@ -539,9 +539,12 @@ MDD* MDDTable::getMDD(CBSNode& node, int id, size_t mdd_levels)
 
 	clock_t t = clock();
 	MDD* mdd = new MDD();
+	mdd->goal_locations = node.goal_locations[id];
 	ConstraintTable ct(initial_constraints[id]);
-	ct.build(node, id, search_engines[id]->goal_location.size());
-	mdd->buildMDD(ct, mdd_levels, search_engines[id]);
+	// JK: changing this line because goals are with the CBSNode now
+	ct.build(node, id, node.goal_locations[id].size());
+	// ct.build(node, id, search_engines[id]->goal_location.size());
+	mdd->buildMDD(ct, mdd_levels, search_engines[id], node, id);
 	if (!lookupTable.empty())
 	{
 		ConstraintsHasher c(id, &node);

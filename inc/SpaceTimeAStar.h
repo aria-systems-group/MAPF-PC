@@ -76,14 +76,14 @@ public:
 	Path findPath(const CBSNode& node, const ConstraintTable& initial_constraints,
 				  const vector<Path*>& paths, int agent, int lower_bound);
  
-	int getTravelTime(int start, int end, const ConstraintTable& constraint_table, int upper_bound);
+	int getTravelTime(int start, int end, const ConstraintTable& constraint_table, int upper_bound, const vector<int>& goals);
 
 	string getName() const { return "MLAStar"; }
 
 	MultiLabelSpaceTimeAStar(const Instance& instance, int agent) :
 			SingleAgentSolver(instance, agent) {}
 
-	Path findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound);
+	Path findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound, const vector<int>& goals);
 
 
 private:
@@ -101,11 +101,11 @@ private:
 	hashtable_t allNodes_table;
 
 	// find path
-	Path findShortestPath(ConstraintTable& constraint_table, const pair<int, int> start_state, int lowerbound);
+	Path findShortestPath(ConstraintTable& constraint_table, const pair<int, int> start_state, int lowerbound, const vector<int>& goals);
 	Path findPath(ConstraintTable& constraint_table, const pair<int, int> start, const pair<int, int> goal);
 
 	// Updates the path datamember
-	void updatePath(const LLNode* goal, Path& path);
+	void updatePath(const LLNode* goal, Path& path, const vector<int>& goals);
 	void updateFocalList();
 	inline MultiLabelAStarNode* popNode();
 	inline void pushNode(MultiLabelAStarNode* node);

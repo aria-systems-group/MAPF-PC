@@ -36,18 +36,21 @@ void PBS::printPaths() const
         cout << "->";
       }
       cout << endl;
-      for (int j = 0; j < paths[i]->timestamps.size(); j++){
-        cout << "(" << instance->getRowCoordinate(search_engines[i]->goal_location[j]) << ", " << instance->getColCoordinate(search_engines[i]->goal_location[j]) << ")@" << paths[i]->timestamps[j];
-        cout << "->";
-      }
-      cout << endl;
+      // JK: commenting out because it breaks my changes and I do not care to use PBS
+      // for (int j = 0; j < paths[i]->timestamps.size(); j++){
+      //   cout << "(" << instance->getRowCoordinate(search_engines[i]->goal_location[j]) << ", " << instance->getColCoordinate(search_engines[i]->goal_location[j]) << ")@" << paths[i]->timestamps[j];
+      //   cout << "->";
+      // }
+      // cout << endl;
     }
 }
 
 inline bool PBS::is_task_a_final_one(int task){
   int agent, i;
   tie(agent, i) = id2task[task];
-  return i == search_engines[agent]->goal_location.size() - 1;
+  // JK: commenting out because it breaks my changes and I do not care to use PBS
+  // return i == search_engines[agent]->goal_location.size() - 1;
+  return false;
 }
 
 inline void PBS::updatePaths(CBSNode* curr)
@@ -85,21 +88,24 @@ CBS(instance, false, heuristics_type::ZERO, screen)
 
 	for (int i = 0; i < num_of_agents; i++)
 	{
-    search_engines[i] = new MultiLabelSpaceTimeAStar(instance, i);
-    for (int j = 0; j < search_engines[i]->goal_location.size(); j++){
-      id2task.push_back({i, j});
-    }
-    if (i != 0){
-      idbase[i] = idbase[i - 1] + search_engines[i - 1]->goal_location.size();
-    }
+    // JK: commenting out because it breaks my changes and I do not care to use PBS
+    // search_engines[i] = new MultiLabelSpaceTimeAStar(instance, i);
+    // for (int j = 0; j < search_engines[i]->goal_location.size(); j++){
+    //   id2task.push_back({i, j});
+    // }
+    // JK: commenting out because it breaks my changes and I do not care to use PBS
+    // if (i != 0){
+      // idbase[i] = idbase[i - 1] + search_engines[i - 1]->goal_location.size();
+    // }
 	}
 
   // initialize priorities
 	for (int i = 0; i < num_of_agents; i++)
     {
-      for (int j = 1; j < search_engines[i]->goal_location.size(); j++){
-        initial_priorities.push_back({task2id({i, j - 1}), task2id({i, j}), -1, -1, constraint_type::GPRIORITY});
-      }
+      // JK: commenting out because it breaks my changes and I do not care to use PBS
+      // for (int j = 1; j < search_engines[i]->goal_location.size(); j++){
+      //   initial_priorities.push_back({task2id({i, j - 1}), task2id({i, j}), -1, -1, constraint_type::GPRIORITY});
+      // }
     }
   // JK: Commenting out because I am not interested in using PBS
   // for (int i = 0; i < instance.temporal_cons.size(); i++){
@@ -236,41 +242,43 @@ unordered_set<int> reachable_set(int source, vector<vector<int>> adj_list){
 
 void PBS::build_ct(ConstraintTable& ct, int task_id, vector<vector<int>> adj_list_r){
 
-  int agent, task;
-  tie(agent, task) = id2task[task_id];
-  ct.goal_location = search_engines[agent]->goal_location[task];
+  // JK: commenting out because it breaks my changes and I do not care to use PBS
+  // int agent, task;
+  // tie(agent, task) = id2task[task_id];
+  // ct.goal_location = search_engines[agent]->goal_location[task];
 
-  auto high_prio_agents = reachable_set(task_id, adj_list_r);
-  high_prio_agents.erase(task_id);
+  // auto high_prio_agents = reachable_set(task_id, adj_list_r);
+  // high_prio_agents.erase(task_id);
 
-  //TODO remove later
-  cout << "Higher-priority tasks: ";
-  for (int i = 0; i < num_of_tasks; i++){
-    if (high_prio_agents.find(i) != high_prio_agents.end()){
-      // int agent, task;
-      tie(agent, task) = id2task[i];
-      bool wait_at_goal = task == search_engines[agent]->goal_location.size() - 1;
-      ct.addPath(*paths[i], wait_at_goal);
-
-      cout << "(" << agent << ", " << task << ") ";
-    }
-  }
-  cout << endl;
-  // cout << "soft cons: ";
+  // //TODO remove later
+  // cout << "Higher-priority tasks: ";
   // for (int i = 0; i < num_of_tasks; i++){
-  //   if (high_prio_agents.find(i) == high_prio_agents.end() && paths[i] != nullptr && !paths[i]->empty()){
-  //     auto task = id2task[i];
-  //     cout << "(" << task.first << ", " << task.second << ") ";
+  //   if (high_prio_agents.find(i) != high_prio_agents.end()){
+  //     // int agent, task;
+  //     // JK: commenting out because it breaks my changes and I do not care to use PBS
+  //     // tie(agent, task) = id2task[i];
+  //     // bool wait_at_goal = task == search_engines[agent]->goal_location.size() - 1;
+  //     // ct.addPath(*paths[i], wait_at_goal);
+
+  //     cout << "(" << agent << ", " << task << ") ";
   //   }
   // }
   // cout << endl;
+  // // cout << "soft cons: ";
+  // // for (int i = 0; i < num_of_tasks; i++){
+  // //   if (high_prio_agents.find(i) == high_prio_agents.end() && paths[i] != nullptr && !paths[i]->empty()){
+  // //     auto task = id2task[i];
+  // //     cout << "(" << task.first << ", " << task.second << ") ";
+  // //   }
+  // // }
+  // // cout << endl;
 
-  // temporal cons
-  for (auto precedent: temporal_adj_list_r[task_id]){
-    assert(!paths[precedent]->empty());
-    ct.length_min = max(ct.length_min, paths[precedent]->end_time() + 1);
-  }
-  ct.latest_timestep = max(ct.latest_timestep, ct.length_min);
+  // // temporal cons
+  // for (auto precedent: temporal_adj_list_r[task_id]){
+  //   assert(!paths[precedent]->empty());
+  //   ct.length_min = max(ct.length_min, paths[precedent]->end_time() + 1);
+  // }
+  // ct.latest_timestep = max(ct.latest_timestep, ct.length_min);
 
 }
 
@@ -394,7 +402,8 @@ bool PBS::generateChild(CBSNode* node, CBSNode* parent){
           cout << "reuse old path" << endl;
           *paths[i] = *copy[i];
         }else{
-          *paths[i] = search_engines[agent]->findPathSegment(ct, start_time, task, 0);
+          // JK: commenting out because it breaks my changes and I do not want to used pbs
+          // *paths[i] = search_engines[agent]->findPathSegment(ct, start_time, task, 0);
         }
         if (paths[i]->empty())
           {
@@ -443,18 +452,19 @@ bool PBS::generateChild(CBSNode* node, CBSNode* parent){
 
   node->g_val = 0;
   for (int i = 0; i < num_of_agents; i++ ){
-    int g_i = search_engines[i]->heuristic_landmark[0];
-    for (int j = 0; j < search_engines[i]->goal_location.size(); j ++ ){
-      int task_id = task2id({i, j});
-      if (paths[task_id]->empty()) {
-        break;
-      }
-      g_i = paths[task_id]->end_time();
-      if (j + 1 < search_engines[i]->goal_location.size()){
-        g_i += search_engines[i]->heuristic_landmark[j + 1];
-      }
-    }
-    node->g_val += g_i;
+    // JK: commenting out because it breaks my changes and I do not care to use PBS
+    // int g_i = search_engines[i]->heuristic_landmark[0];
+    // for (int j = 0; j < search_engines[i]->goal_location.size(); j ++ ){
+    //   int task_id = task2id({i, j});
+    //   if (paths[task_id]->empty()) {
+    //     break;
+    //   }
+    //   g_i = paths[task_id]->end_time();
+    //   if (j + 1 < search_engines[i]->goal_location.size()){
+    //     g_i += search_engines[i]->heuristic_landmark[j + 1];
+    //   }
+    // }
+    // node->g_val += g_i;
   }
   // compute g
 
@@ -517,7 +527,8 @@ bool PBS::generateRoot()
       ConstraintTable ct;
       build_ct(ct, i, adj_list_r);
 
-      paths_found_initially[i] = search_engines[agent]->findPathSegment(ct, start_time, task, 0);
+      // JK: commenting out because i do not want to use PBS
+      // paths_found_initially[i] = search_engines[agent]->findPathSegment(ct, start_time, task, 0);
       if (paths_found_initially[i].empty())
         {
           cout << "No path exists for agent " << agent << "(" << task << ")" << endl;
@@ -585,21 +596,23 @@ bool PBS::generateRoot()
     // printPaths();
   }
 
-  dummy_start->g_val += 0;
-  for (int i = 0; i < num_of_agents; i++ ){
-    int g_i = search_engines[i]->heuristic_landmark[0];
-    for (int j = 0; j < search_engines[i]->goal_location.size(); j ++ ){
-      int task_id = task2id({i, j});
-      if (paths[task_id]->empty()) {
-        break;
-      }
-      g_i = paths[task_id]->end_time();
-      if (j + 1 < search_engines[i]->goal_location.size()){
-        g_i += search_engines[i]->heuristic_landmark[j + 1];
-      }
-    }
-    dummy_start->g_val += g_i;
-  }
+  // JK: commenting out because it breaks my changes and I do not care to use PBS
+  // dummy_start->g_val += 0;
+  // for (int i = 0; i < num_of_agents; i++ ){
+  //   int g_i = search_engines[i]->heuristic_landmark[0];
+  //   for (int j = 0; j < search_engines[i]->goal_location.size(); j ++ ){
+  //     int task_id = task2id({i, j});
+  //     if (paths[task_id]->empty()) {
+  //       break;
+  //     }
+  //     g_i = paths[task_id]->end_time();
+  //     // JK: commenting out because it breaks my changes and I do not care to use PBS
+  //     // if (j + 1 < search_engines[i]->goal_location.size()){
+  //     //   g_i += search_engines[i]->heuristic_landmark[j + 1];
+  //     // }
+  //   }
+  //   dummy_start->g_val += g_i;
+  // }
   // compute g
   return true;
 }
@@ -756,20 +769,21 @@ string PBS::getSolverName() const
 void PBS::join_paths(){
   cout << "join path" << endl;
   joined_paths.resize(num_of_agents);
-  for (int i = 0; i < num_of_agents; i ++){
-    for (int j = 0; j < search_engines[i]->goal_location.size(); j++){
-      int task_id = task2id({i, j});
-      if (j == 0){
-        joined_paths[i].path.push_back(paths[task_id]->front());
-      }
+  // JK: commenting out because it breaks my changes and I do not care to use PBS
+  // for (int i = 0; i < num_of_agents; i ++){
+  //   for (int j = 0; j < search_engines[i]->goal_location.size(); j++){
+  //     int task_id = task2id({i, j});
+  //     if (j == 0){
+  //       joined_paths[i].path.push_back(paths[task_id]->front());
+  //     }
 
-      assert(joined_paths[i].size() - 1 == paths[task_id]->begin_time);
-      for (int k = 1; k < paths[task_id]->size(); k++){
-        joined_paths[i].path.push_back(paths[task_id]->at(k));
-      }
-      joined_paths[i].timestamps.push_back(joined_paths[i].size() - 1);
-    }
-  }
+  //     assert(joined_paths[i].size() - 1 == paths[task_id]->begin_time);
+  //     for (int k = 1; k < paths[task_id]->size(); k++){
+  //       joined_paths[i].path.push_back(paths[task_id]->at(k));
+  //     }
+  //     joined_paths[i].timestamps.push_back(joined_paths[i].size() - 1);
+  //   }
+  // }
   paths.resize(num_of_agents);
   for (int i = 0 ; i < num_of_agents; i++){
     paths[i] = & joined_paths[i];

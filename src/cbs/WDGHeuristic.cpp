@@ -255,8 +255,11 @@ int WDGHeuristic::solve2Agents(int a1, int a2, const CBSNode& node, bool cardina
 	vector<ConstraintTable> constraints{
 			ConstraintTable(initial_constraints[a1]),
 			ConstraintTable(initial_constraints[a2]) };
-	constraints[0].build(node, a1, search_engines[a1]->goal_location.size());
-	constraints[1].build(node, a2, search_engines[a2]->goal_location.size());
+	// JK: changing these lines because goal locations now belong to CBSNode
+	constraints[0].build(node, a1, node.goal_locations[a1].size());
+	constraints[1].build(node, a2, node.goal_locations[a2].size());
+	// constraints[0].build(node, a1, search_engines[a1]->goal_location.size());
+	// constraints[1].build(node, a2, search_engines[a2]->goal_location.size());
 	CBS cbs(engines, constraints, initial_paths, heuristics_type::CG, screen);
 	cbs.setPrioritizeConflicts(PC);
 	cbs.setDisjointSplitting(disjoint_splitting);

@@ -103,10 +103,10 @@ bool TaskAssignment::loadAgents(){
   }
 
   cout << "#agents: " << num_of_agents << "\t#tasks: " << num_of_tasks << "\t#dependecies: " << num_of_dependencies << endl;
-
-  goal_locations.push_back(task_locations);
-  search_engine = std::make_unique<MultiLabelSpaceTimeAStar>(*((Instance*) this) , 0);
-  goal_locations.clear();
+  // JK: Commenting out because I am not concerned with using it
+  // goal_locations.push_back(task_locations);
+  // search_engine = std::make_unique<MultiLabelSpaceTimeAStar>(*((Instance*) this) , 0);
+  // goal_locations.clear();
 
   myfile.close();
 
@@ -215,20 +215,20 @@ void TaskAssignment::find_greedy_plan(){
 
   // write plan to goal_locations and temporal_dependencies;
   vector<pair<int, int>> task_to_agent_and_index(num_of_tasks, {-1, -1});
+  // JK: Commenting out because I am not concerned with using it
+  // goal_locations.clear();
+  // goal_locations.resize(num_of_agents);
+  // for (int i = 0; i < num_of_agents; i++){
+  //   for (int j = 0; j < task_plan[i].size(); j++){
+  //     auto task_idx = task_plan[i][j];
+  //     task_to_agent_and_index[task_idx] = {i, j};
+  //     goal_locations[i].push_back(task_locations[task_idx]);
+  //   }
+  //   if (task_plan[i].size() == 0){
+  //     goal_locations[i].push_back(start_locations[i]);
+  //   }
 
-  goal_locations.clear();
-  goal_locations.resize(num_of_agents);
-  for (int i = 0; i < num_of_agents; i++){
-    for (int j = 0; j < task_plan[i].size(); j++){
-      auto task_idx = task_plan[i][j];
-      task_to_agent_and_index[task_idx] = {i, j};
-      goal_locations[i].push_back(task_locations[task_idx]);
-    }
-    if (task_plan[i].size() == 0){
-      goal_locations[i].push_back(start_locations[i]);
-    }
-
-  }
+  // }
 
   // JK: commented out because I am not interested in this task assignment
   // temporal_cons.clear(); 

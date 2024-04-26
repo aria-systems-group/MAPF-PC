@@ -70,16 +70,20 @@ public:
 
 	int getDefaultNumberOfAgents() const { return num_of_agents; }
 
+	// JK: Moving to CBSNode in an attempt to turn this CBS Tree implementation into a CBS Forest
+	// Moving temporal constraints to the nodes would (i think) give me the power to change the constraints
+	//	each time I have a new root node. 
+	// I think the temporal constraints will need to be copied from parent
   // // should be moved to private
   // // vector<TemporalEdge> temporal_cons;
   // // temporal_cons[i * num_of_agents + j] = [{k, l}]
   // // The k-th task of i should happens before the l-th task of j
   // vector<vector<pair<int, int>> > temporal_cons;
 
-	// JK: Moving to CBSNode in an attempt to turn this CBS Tree implementation into a CBS Forest
-	// Moving temporal constraints to the nodes would (i think) give me the power to change the constraints
-	//	each time I have a new root node. 
-	// I think the temporal constraints will need to be copied from parent
+	// JK: Adding a few functions here to help fill instance inside LtlMapfPlanner
+	Instance(const int num_agents, const int num_rows, const int num_cols, const std::vector<int>& obstacles);
+
+	void SetStartForAgentIndex(int idx, int start);
 
 protected:
 	// int moves_offset[MOVE_COUNT];
@@ -89,7 +93,9 @@ protected:
 
 	int num_of_agents;
 	vector<int> start_locations;
-	vector<vector<int>> goal_locations;
+
+	// JK: Moving Goal location definitions to CBSNode for my work
+	// vector<vector<int>> goal_locations;
 
 
 	bool loadMap();

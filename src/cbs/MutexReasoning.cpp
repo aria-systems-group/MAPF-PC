@@ -63,8 +63,11 @@ shared_ptr<Conflict> MutexReasoning::findMutexConflict(const vector<Path*> & pat
   ConstraintTable ct1(initial_constraints[a1]);
   ConstraintTable ct2(initial_constraints[a2]);
 
-  ct1.build(node, a1, search_engines[a1]->goal_location.size());
-  ct2.build(node, a2, search_engines[a2]->goal_location.size());
+  // JK: changing these lines because goal_locations now lives with CBSNode
+  ct1.build(node, a1, node.goal_locations[a1].size());
+  ct2.build(node, a2, node.goal_locations[a2].size());
+  // ct1.build(node, a1, search_engines[a1]->goal_location.size());
+  // ct2.build(node, a2, search_engines[a2]->goal_location.size());
   auto ip = IPMutexPropagation(&mdd_1_cpy, &mdd_2_cpy, search_engines[a1], search_engines[a2],
                                ct1, ct2);
   con_vec a;

@@ -1,9 +1,9 @@
 #include "SpaceTimeAStar.h"
 
-void MultiLabelSpaceTimeAStar::updatePath(const LLNode* goal, Path& path)
+void MultiLabelSpaceTimeAStar::updatePath(const LLNode* goal, Path& path, const vector<int>& goals)
 {
 	path.path.resize(goal->g_val + 1);
-	path.timestamps.resize(goal_location.size(), 0);
+	path.timestamps.resize(goals.size(), 0);
   path.timestamps.back() = goal->g_val;
 
 	const LLNode* curr = goal;
@@ -33,7 +33,8 @@ Path MultiLabelSpaceTimeAStar::findPath(const CBSNode& node, const ConstraintTab
 	// build constraint table
 	auto starrt_time = clock();
 	ConstraintTable constraint_table(initial_constraints);
-	constraint_table.build(node, agent,goal_location.size());
+	// JK: changing this line because goal_locations now belong to CBSNode
+	constraint_table.build(node, agent, node.goal_locations.size());
 
 	runtime_build_CT = (double) (clock() - starrt_time) / CLOCKS_PER_SEC;
 	if (constraint_table.length_min >= MAX_TIMESTEP || constraint_table.length_min > constraint_table.length_max ||  // the agent cannot reach
@@ -47,21 +48,23 @@ Path MultiLabelSpaceTimeAStar::findPath(const CBSNode& node, const ConstraintTab
 	constraint_table.buildCAT(agent, paths, node.makespan + 1);
 	runtime_build_CAT = (double) (clock() - starrt_time) / CLOCKS_PER_SEC;
 
-    return findShortestPath(constraint_table, make_pair(start_location, 0), lowerbound);
+	// compute heuristics for given goal sequence inside cbs node
+	// doing this here every time is pretty inefficient but least subjective to bugs
+	compute_heuristics(node.goal_locations[agent]);
+  return findShortestPath(constraint_table, make_pair(start_location, 0), lowerbound, node.goal_locations[agent]);
 
   
 }
 
-
-Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_table, const pair<int, int> start_state, int lowerbound)
+Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_table, const pair<int, int> start_state, int lowerbound, const vector<int>& goals)
 {
 
   // for vertex of different stage, the f val should be bounded within the ub.
-  vector<int> f_ub(goal_location.size(), INT_MAX);
-  if (constraint_table.leq_goal_time[goal_location.size() - 1] != INT_MAX){
-    f_ub.back() = constraint_table.leq_goal_time[goal_location.size() - 1];
+  vector<int> f_ub(goals.size(), INT_MAX);
+  if (constraint_table.leq_goal_time[goals.size() - 1] != INT_MAX){
+    f_ub.back() = constraint_table.leq_goal_time[goals.size() - 1];
   }
-  for (int i = (int) goal_location.size() - 2; i >= 0; i--){
+  for (int i = (int) goals.size() - 2; i >= 0; i--){
     if (constraint_table.leq_goal_time[i] != INT_MAX){
       f_ub[i] = min(f_ub[i + 1], constraint_table.leq_goal_time[i] + heuristic_landmark[i]);
     }else{
@@ -87,7 +90,7 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
 	start->in_openlist = true;
 
 
-  if (start->location==  (unsigned int)goal_location[0] &&  constraint_table.g_goal_time[0] < start->g_val){
+  if (start->location==  (unsigned int)goals[0] &&  constraint_table.g_goal_time[0] < start->g_val){
     start->stage += 1;
     if (use_timestamps){
       // timestamps.push_back(0);
@@ -105,12 +108,12 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
 		auto* curr = popNode();
 
 		// check if the popped node is a goal
-		if (curr->location == goal_location.back() && // arrive at the goal location
-        curr->stage == goal_location.size() - 1 && // reach all previous goals
+		if (curr->location == goals.back() && // arrive at the goal location
+        curr->stage == goals.size() - 1 && // reach all previous goals
 			!curr->wait_at_goal && // not wait at the goal location
 			curr->timestep >= holding_time) // the agent can hold the goal location afterward
 		{
-			updatePath(curr, path);
+			updatePath(curr, path, goals);
 			break;
 		}
 
@@ -148,7 +151,7 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
 			if (next_g_val + next_h_val > constraint_table.length_max || next_g_val + next_h_val > f_ub[stage])
 				continue;
 
-      if (next_location ==  (unsigned int)goal_location[stage] && stage < goal_location.size() - 1 && constraint_table.g_goal_time[stage] < curr->g_val + 1){
+      if (next_location ==  (unsigned int)goals[stage] && stage < goals.size() - 1 && constraint_table.g_goal_time[stage] < curr->g_val + 1){
         stage += 1;
         if (use_timestamps){
           timestamps.push_back(curr->g_val + 1);
@@ -166,7 +169,7 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
       next->timestamps  = timestamps;
       next->dist_to_next = my_heuristic[stage][next_location];
 
-			if (next->stage == goal_location.size() - 1 && next_location == goal_location.back() && curr->location == goal_location.back()){
+			if (next->stage == goals.size() - 1 && next_location == goals.back() && curr->location == goals.back()){
 				next->wait_at_goal = true;
       }
 
@@ -226,11 +229,11 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
 }
 
 
-Path MultiLabelSpaceTimeAStar::findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound)
+Path MultiLabelSpaceTimeAStar::findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound,const vector<int>& goals)
 {
   int loc = start_location;
   if (stage != 0){
-    loc = goal_location[stage - 1];
+    loc = goals[stage - 1];
   }
 
 
@@ -255,7 +258,7 @@ Path MultiLabelSpaceTimeAStar::findPathSegment(ConstraintTable& constraint_table
 	allNodes_table.insert(start);
 	min_f_val = (int) start->getFVal();
 	int holding_time = constraint_table.length_min;
-  if (stage == goal_location.size() - 1){
+  if (stage == goals.size() - 1){
     holding_time = constraint_table.getHoldingTime(); // the earliest timestep that the agent can hold its goal location. The length_min is considered here.
   }
 	lower_bound = max(holding_time - start_time, max(min_f_val, lowerbound));
@@ -266,10 +269,10 @@ Path MultiLabelSpaceTimeAStar::findPathSegment(ConstraintTable& constraint_table
 		auto* curr = popNode();
 
 		// check if the popped node is a goal
-		if (curr->location == goal_location[stage] && // reach all previous goals
+		if (curr->location == goals[stage] && // reach all previous goals
 			curr->timestep >= holding_time) // the agent can hold the goal location afterward
 		{
-			updatePath(curr, path);
+			updatePath(curr, path, goals);
 			break;
 		}
 		if (curr->timestep >= constraint_table.length_max)
@@ -322,7 +325,7 @@ Path MultiLabelSpaceTimeAStar::findPathSegment(ConstraintTable& constraint_table
 
       next->dist_to_next = my_heuristic[stage][next_location];
 
-			if (next->stage == goal_location.size() - 1 && next_location == goal_location.back() && curr->location == goal_location.back()){
+			if (next->stage == goals.size() - 1 && next_location == goals.back() && curr->location == goals.back()){
 				next->wait_at_goal = true;
       }
 
@@ -473,8 +476,7 @@ Path MultiLabelSpaceTimeAStar::findPath(ConstraintTable& constraint_table, const
   */
 }
 
-
-int MultiLabelSpaceTimeAStar::getTravelTime(int start, int end, const ConstraintTable& constraint_table, int upper_bound)
+int MultiLabelSpaceTimeAStar::getTravelTime(int start, int end, const ConstraintTable& constraint_table, int upper_bound, const vector<int>& goals)
 {
 	int length = MAX_TIMESTEP;
 	if (constraint_table.length_min >= MAX_TIMESTEP || constraint_table.length_min > constraint_table.length_max ||  // the agent cannot reach
@@ -515,7 +517,7 @@ int MultiLabelSpaceTimeAStar::getTravelTime(int start, int end, const Constraint
 
         // setting the stage
         auto stage = curr->stage;
-        if (next_location == goal_location[stage] && stage < goal_location.size() - 1){
+        if (next_location == goals[stage] && stage < goals.size() - 1){
           stage += 1;
         }
 

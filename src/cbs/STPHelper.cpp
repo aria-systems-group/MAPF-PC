@@ -10,19 +10,21 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
   // generate STP only with distance heuristic
   agent_lb_ub.resize(search_engines.size());
   for (int i = 0; i < search_engines.size(); i++){
-    agent_lb_ub[i].resize(search_engines[i]->goal_location.size(), {0, INT_MAX});
+    // JK: changing this line because goal locations now belong to CBSNode
+    agent_lb_ub[i].resize(root->goal_locations[i].size(), {0, INT_MAX});
+    // agent_lb_ub[i].resize(search_engines[i]->goal_location.size(), {0, INT_MAX});
     agent_lb_ub[i][0].first = search_engines[i]->my_heuristic[0][search_engines[i]->start_location];
     tp.add_node(std::to_string(i) + "_" + std::to_string(0));
     tp.add_lb(std::to_string(i) + "_" + std::to_string(0), search_engines[i]->my_heuristic[0][search_engines[i]->start_location]);
-
-    for (int j = 1; j < search_engines[i]->goal_location.size(); j++){
+    // JK: changing this line because goal locations now belong to CBSNode
+    for (int j = 1; j < root->goal_locations[i].size(); j++){
       tp.add_node(std::to_string(i) + "_" + std::to_string(j));
       tp.add_edge(std::to_string(i) + "_" + std::to_string(j),
                   std::to_string(i) + "_" + std::to_string(j - 1),
-                  - search_engines[i]->my_heuristic[j][search_engines[i]->goal_location[j-1]]
+                  - search_engines[i]->my_heuristic[j][root->goal_locations[i][j-1]]
                   );
       agent_lb_ub[i][j].first = agent_lb_ub[i][j - 1].first +
-        search_engines[i]->my_heuristic[j][search_engines[i]->goal_location[j-1]];
+        search_engines[i]->my_heuristic[j][root->goal_locations[i][j-1]];
     }
   }
   // test
@@ -32,7 +34,8 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
   assert(res);
 
   for (int i = 0; i < search_engines.size(); i++){
-    for (int j = 1; j < search_engines[i]->goal_location.size(); j++){
+    // JK: changing this line because goal locations now belong to CBSNode
+    for (int j = 1; j < root->goal_locations[i].size(); j++){
       string name = std::to_string(i) + "_" + std::to_string(j);
       assert(get_lb(tp, dm , name) == agent_lb_ub[i][j].first && get_ub(tp, dm , name) == agent_lb_ub[i][j].second);
     }
@@ -63,11 +66,11 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
 
   res  = compute_distance(tp, dm);
   assert(res);
-
+  // JK: changing this line because goal locations now belong to CBSNode
   for (int i = 0; i < search_engines.size(); i++){
-    initial_constraints[i].leq_goal_time.resize(search_engines[i]->goal_location.size(), INT_MAX);
-    initial_constraints[i].g_goal_time.resize(search_engines[i]->goal_location.size(), -1);
-    for (int j = 0; j < search_engines[i]->goal_location.size(); j++){
+    initial_constraints[i].leq_goal_time.resize(root->goal_locations[i].size(), INT_MAX);
+    initial_constraints[i].g_goal_time.resize(root->goal_locations[i].size(), -1);
+    for (int j = 0; j < root->goal_locations[i].size(); j++){
       string name = std::to_string(i) + "_" + std::to_string(j);
       if(get_lb(tp, dm , name) != agent_lb_ub[i][j].first){
         cout << "new lb for " << name << ": " << get_lb(tp, dm , name) << endl;
@@ -150,7 +153,8 @@ bool STPHelper::propagate(CBSNode* parent, CBSNode* child){
   for (int i = 0; i < search_engines.size(); i++){
     // initial_constraints[i].leq_goal_time.resize(search_engines[i]->goal_location.size(), INT_MAX);
     // initial_constraints[i].g_goal_time.resize(search_engines[i]->goal_location.size(), -1);
-    for (int j = 0; j < search_engines[i]->goal_location.size(); j++){
+    // JK: changing these lines because goal locations are now set by CBSNode
+    for (int j = 0; j < child->goal_locations[i].size(); j++){
       string name = std::to_string(i) + "_" + std::to_string(j);
       if(get_lb(tp_copy, dm_parent , name) != get_lb(tp_copy, dm_ch, name)){
         cout << "new lb for " << name << ": " << get_lb(tp, dm_ch, name) << endl;
