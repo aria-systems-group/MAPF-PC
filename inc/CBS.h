@@ -67,10 +67,10 @@ public:
   // Runs the algorithm until the problem is solved or time is exhausted
   virtual bool solve(double time_limit, int cost_lowerbound = 0, int cost_upperbound = MAX_COST);
 
-  CBS(const Instance& instance, bool sipp, heuristics_type heuristic, int screen);
-  CBS(vector<SingleAgentSolver*>& search_engines,
-    const vector<ConstraintTable>& constraints,
-      vector<Path>& paths_found_initially, heuristics_type heuristic, int screen);
+  CBS(Instance& instance, bool sipp, heuristics_type heuristic, int screen);
+  // CBS(vector<SingleAgentSolver*>& search_engines,
+  //   const vector<ConstraintTable>& constraints,
+  //     vector<Path>& paths_found_initially, heuristics_type heuristic, int screen);
   void clearSearchEngines();
   virtual  ~CBS();
 
@@ -81,6 +81,8 @@ public:
 
   // JK: Assigning this responsibility to CBSNode
   vector<ConstraintTable> initial_constraints;
+
+  virtual void printPaths(CBSNode* curr) const;
 
 protected:
   bool target_reasoning; // using target reasoning
@@ -99,7 +101,7 @@ protected:
   CBSHeuristic* heuristic_helper;
 
   pairing_heap<CBSNode*, compare<CBSNode::compare_node>> open_list;
-  pairing_heap<CBSNode*, compare<CBSNode::secondary_compare_node>> focal_list;
+  // pairing_heap<CBSNode*, compare<CBSNode::secondary_compare_node>> focal_list;
   list<CBSNode*> allNodes_table;
 
 
@@ -119,7 +121,6 @@ protected:
 
 
   vector<Path*> paths;
-  vector<Path> paths_found_initially;  // contain initial paths found
   // vector<MDD*> mdds_initially;  // contain initial paths found
   vector<SingleAgentSolver*> search_engines;  // used to find (single) agents' paths and mdd
 
@@ -132,8 +133,8 @@ protected:
   virtual bool generateRoot();
 
   //conflicts
-  void findConflicts(CBSNode& curr);
-  void findConflicts(CBSNode& curr, int a1, int a2);
+  virtual void findConflicts(CBSNode& curr);
+  virtual void findConflicts(CBSNode& curr, int a1, int a2);
   shared_ptr<Conflict> chooseConflict(const CBSNode& node) const;
   void classifyConflicts(CBSNode& parent);
   // void copyConflicts(const list<shared_ptr<Conflict>>& conflicts,
@@ -147,7 +148,7 @@ protected:
 
   //update information
   void updatePaths(CBSNode* curr);
-  void updateFocalList();
+  virtual void updateFocalList();
   inline void releaseNodes();
   //inline void releaseMDDTable();
   // void copyConflictGraph(CBSNode& child, const CBSNode& parent);

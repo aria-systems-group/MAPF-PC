@@ -24,7 +24,7 @@ void MultiLabelSpaceTimeAStar::updatePath(const LLNode* goal, Path& path, const 
 	}
 }
 
-
+// main function call from LTL Planner
 Path MultiLabelSpaceTimeAStar::findPath(const CBSNode& node, const ConstraintTable& initial_constraints,
 							  const vector<Path*>& paths, int agent, int lowerbound)
 {
@@ -83,14 +83,13 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
                                        0, false);
 
   // start->timestamps.resize(goal_location.size());
-
 	num_generated++;
 	start->open_handle = open_list.push(start);
 	start->focal_handle = focal_list.push(start);
 	start->in_openlist = true;
 
 
-  if (start->location==  (unsigned int)goals[0] &&  constraint_table.g_goal_time[0] < start->g_val){
+  if (start->location ==  (unsigned int)goals[0] && constraint_table.g_goal_time[0] >= 0 && constraint_table.g_goal_time[0] < start->g_val){
     start->stage += 1;
     if (use_timestamps){
       // timestamps.push_back(0);
@@ -157,7 +156,10 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
           timestamps.push_back(curr->g_val + 1);
         }
       }
-
+      // else if (next_location == (unsigned int)goals[stage] && constraint_table.g_goal_time[stage] > curr->g_val)
+      // 	continue; // JK: do not want to go into any goal region until we *actually* reach it
+      // else if (next_location != (unsigned int)goals[stage] && !instance.isLocationAllowed(next_location, stage))
+      // 	continue; // JK: if next_location is not a goal, then we cannot be inside any labeled region
 
 			int next_internal_conflicts = curr->num_of_conflicts +
 										  constraint_table.getNumOfConflictsForStep(curr->location, next_location, next_timestep);

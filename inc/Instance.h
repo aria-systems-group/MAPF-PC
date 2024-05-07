@@ -1,6 +1,7 @@
 #pragma once
 
 #include"common.h"
+#include <map>
 
 typedef std::pair<int, int> event;
 
@@ -36,7 +37,7 @@ public:
 	inline int linearizeCoordinate(int row, int col) const { return (this->num_of_cols * row + col); }
 	inline int getRowCoordinate(int id) const { return id / this->num_of_cols; }
 	inline int getColCoordinate(int id) const { return id % this->num_of_cols; }
-	inline pair<int, int> getCoordinate(int id) const { return make_pair(id / this->num_of_cols, id % this->num_of_cols); }
+	inline pair<int, int> getCoordinate(int id) const { return make_pair(id % this->num_of_cols, id / this->num_of_cols); }
 	inline int getCols() const { return num_of_cols; }
 
 	inline int getManhattanDistance(int loc1, int loc2) const
@@ -84,12 +85,47 @@ public:
 	Instance(const int num_agents, const int num_rows, const int num_cols, const std::vector<int>& obstacles);
 
 	void SetStartForAgentIndex(int idx, int start);
+	int GetStartForAgentIndex(int idx)
+	{
+		return start_locations[idx];
+	}
+
+	bool IsObstacle(int id)
+	{
+		return my_map[id];
+	}
+
+	void addProposition(int loc, int prop)
+	{
+		std::vector<int> current_props = label_map.at(loc);
+		if (std::find(current_props.begin(), current_props.end(), prop) == current_props.end())
+			label_map[loc].push_back(prop);
+	}
+
+	bool isLocationAllowed(int loc, int stage) const
+	{
+		std::vector<int> loc_labels = label_map.at(loc);
+		std::vector<int> stage_unallowed_labels = robot_i_unallowed_props_per_stage.at(stage);
+		for (int& label : loc_labels)
+		{
+			if (std::find(stage_unallowed_labels.begin(), stage_unallowed_labels.end(), label) != stage_unallowed_labels.end())
+				return false;
+		}
+		return true;
+	}
+
+	std::map<int, std::vector<int>> robot_i_unallowed_props_per_stage; // maps a stage (int) to (unallowed_props vector of ints)
+	// JK: robot_stage_unallowed_props will need to be updated every time multi-level A* is called bc it is robot / task assignment specific!!
 
 protected:
 	// int moves_offset[MOVE_COUNT];
 	vector<bool> my_map;
 	string map_fname;
 	string agent_fname;
+
+	// std::map<int, bool> is_location_empty; // JK: true unless location in workspace satisfies a boolean proposition
+	// JK: second attempt at making these constraints
+	std::map<int, std::vector<int>> label_map; // JK: maps location (int) --> a set of labels (vector of int) that are true at such a state
 
 	int num_of_agents;
 	vector<int> start_locations;

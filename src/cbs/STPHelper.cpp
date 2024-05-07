@@ -53,9 +53,9 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
         auto from_landmark = cons.first;
         auto to_landmark = cons.second;
 
-        cout << "add con" <<
-          a1 << "("  << from_landmark<< ")"
-             << a2 << "("  << to_landmark<< ")" << endl;
+        // cout << "add con" <<
+        //   a1 << "("  << from_landmark<< ")"
+        //      << a2 << "("  << to_landmark<< ")" << endl;
         // we should have (paths[a1]->timestamps[from_landmark] < paths[a2]->timestamps[to_landmark])
         tp.add_edge(std::to_string(a2) + "_" + std::to_string(to_landmark),
                     std::to_string(a1) + "_" + std::to_string(from_landmark),
@@ -68,18 +68,18 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
   assert(res);
   // JK: changing this line because goal locations now belong to CBSNode
   for (int i = 0; i < search_engines.size(); i++){
-    initial_constraints[i].leq_goal_time.resize(root->goal_locations[i].size(), INT_MAX);
-    initial_constraints[i].g_goal_time.resize(root->goal_locations[i].size(), -1);
+    root->initial_constraints[i].leq_goal_time.resize(root->goal_locations[i].size(), INT_MAX);
+    root->initial_constraints[i].g_goal_time.resize(root->goal_locations[i].size(), -1);
     for (int j = 0; j < root->goal_locations[i].size(); j++){
       string name = std::to_string(i) + "_" + std::to_string(j);
       if(get_lb(tp, dm , name) != agent_lb_ub[i][j].first){
-        cout << "new lb for " << name << ": " << get_lb(tp, dm , name) << endl;
-        initial_constraints[i].g_goal_time[j] = get_lb(tp, dm , name) - 1;
-        initial_constraints[i].length_min = max(initial_constraints[i].length_min, get_lb(tp, dm , name));
+        // cout << "new lb for " << name << ": " << get_lb(tp, dm , name) << endl;
+        root->initial_constraints[i].g_goal_time[j] = get_lb(tp, dm , name) - 1;
+        root->initial_constraints[i].length_min = max(root->initial_constraints[i].length_min, get_lb(tp, dm , name));
       }
       if(get_ub(tp, dm , name) != agent_lb_ub[i][j].second){
-        cout << "new ub for " << name << ": " << get_ub(tp, dm , name) << endl;
-        initial_constraints[i].leq_goal_time[j] = get_ub(tp, dm , name);
+        // cout << "new ub for " << name << ": " << get_ub(tp, dm , name) << endl;
+        root->initial_constraints[i].leq_goal_time[j] = get_ub(tp, dm , name);
       }
     }
   }
@@ -157,14 +157,14 @@ bool STPHelper::propagate(CBSNode* parent, CBSNode* child){
     for (int j = 0; j < child->goal_locations[i].size(); j++){
       string name = std::to_string(i) + "_" + std::to_string(j);
       if(get_lb(tp_copy, dm_parent , name) != get_lb(tp_copy, dm_ch, name)){
-        cout << "new lb for " << name << ": " << get_lb(tp, dm_ch, name) << endl;
+        // cout << "new lb for " << name << ": " << get_lb(tp, dm_ch, name) << endl;
         child->constraints.push_back({i, j, -1, get_lb(tp, dm_ch, name) -1, constraint_type::GSTOP});
         // initial_constraints[i].g_goal_time[j] = get_lb(tp, dm , name) - 1;
         // initial_constraints[i].length_min = max(initial_constraints[i].length_min, get_lb(tp, dm , name));
       }
       if(get_ub(tp_copy, dm_parent , name) != get_ub(tp_copy, dm_ch, name)){
       // if(get_ub(tp, dm , name) != agent_lb_ub[i][j].second){
-        cout << "new ub for " << name << ": " << get_ub(tp, dm_ch , name) << endl;
+        // cout << "new ub for " << name << ": " << get_ub(tp, dm_ch , name) << endl;
         // initial_constraints[i].leq_goal_time[j] = get_ub(tp, dm , name);
         child->constraints.push_back({i, j, -1, get_ub(tp, dm_ch, name) -1, constraint_type::LEQSTOP});
       }

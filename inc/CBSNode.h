@@ -3,6 +3,7 @@
 #include "common.h"
 #include "Conflict.h"
 #include "ConstraintTable.h"
+#include "Instance.h"
 
 enum node_selection { NODE_RANDOM, NODE_H, NODE_DEPTH, NODE_CONFLICTS, NODE_CONFLICTPAIRS, NODE_MVC };
 
@@ -45,6 +46,10 @@ public:
 		}
 	};
 
+	// JK: update the map of allowable props based on the stage
+	void updateStagePropMap(int agent, Instance& instance) const;
+	std::vector<std::map<int, std::vector<int>>> unallowed_props_maps; // one map per robot. maps the stage for robot i to a list of unallowed props
+
 	// conflicts in the current paths
 	list<shared_ptr<Conflict>> conflicts;
 	list<shared_ptr<Conflict>> unknownConf;
@@ -67,11 +72,16 @@ public:
   	vector<vector<int>> goal_locations; // system goals
   	vector<ConstraintTable> initial_constraints; // see CBS constructor for details on how this should be set
   	int helpers_idx = -1; // this is set during root node setup -- provides a pointer to the correct helper based on the what tree its in
+  	vector<Path> paths_found_initially;  // contain initial paths found
+  	// inter_goal_cons[i * num_of_agents + j] = [{k, l}]
+  	// The k-th task of i should happen simultaneously with the l-th task of j
+  	vector<vector<pair<int, int>> > inter_goal_cons;
+  	std::vector<int> arg_path;
 
   	bool is_solution = false;
 
-	int g_val;
-	int h_val;
+	int g_val; // this is SOC cost
+	int h_val; // this depends on which heuristic you are using
 	int depth; // depth of this CT node
 	size_t makespan = 0; // makespan over all paths
 	int tie_breaking = 0; // tie breaking for node selection

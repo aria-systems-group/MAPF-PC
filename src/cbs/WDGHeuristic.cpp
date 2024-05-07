@@ -246,49 +246,51 @@ WDGHeuristic::DPForWMVC(std::vector<int>& x, int i, int sum, const std::vector<i
 
 int WDGHeuristic::solve2Agents(int a1, int a2, const CBSNode& node, bool cardinal)
 {
-	vector<SingleAgentSolver*> engines(2);
-	engines[0] = search_engines[a1];
-	engines[1] = search_engines[a2];
-	vector<Path> initial_paths(2);
-	initial_paths[0] = *paths[a1];
-	initial_paths[1] = *paths[a2];
-	vector<ConstraintTable> constraints{
-			ConstraintTable(initial_constraints[a1]),
-			ConstraintTable(initial_constraints[a2]) };
-	// JK: changing these lines because goal locations now belong to CBSNode
-	constraints[0].build(node, a1, node.goal_locations[a1].size());
-	constraints[1].build(node, a2, node.goal_locations[a2].size());
-	// constraints[0].build(node, a1, search_engines[a1]->goal_location.size());
-	// constraints[1].build(node, a2, search_engines[a2]->goal_location.size());
-	CBS cbs(engines, constraints, initial_paths, heuristics_type::CG, screen);
-	cbs.setPrioritizeConflicts(PC);
-	cbs.setDisjointSplitting(disjoint_splitting);
-	cbs.setBypass(false); // I guess that bypassing does not help two-agent path finding???
-	cbs.setRectangleReasoning(rectangle_reasoning);
-	cbs.setCorridorReasoning(corridor_reasoning);
-	cbs.setTargetReasoning(target_reasoning);
-	cbs.setMutexReasoning(mutex_reasoning);
-	cbs.setConflictSelectionRule(conflict_seletion_rule);
-	cbs.setNodeSelectionRule(node_selection_rule);
-	cbs.setNodeLimit(node_limit);
+	// JK: I broke this and I do not use it so its fine
+	throw std::runtime_error("Cannot use WDG heuristic!");
+	// vector<SingleAgentSolver*> engines(2);
+	// engines[0] = search_engines[a1];
+	// engines[1] = search_engines[a2];
+	// vector<Path> initial_paths(2);
+	// initial_paths[0] = *paths[a1];
+	// initial_paths[1] = *paths[a2];
+	// vector<ConstraintTable> constraints{
+	// 		ConstraintTable(initial_constraints[a1]),
+	// 		ConstraintTable(initial_constraints[a2]) };
+	// // JK: changing these lines because goal locations now belong to CBSNode
+	// constraints[0].build(node, a1, node.goal_locations[a1].size());
+	// constraints[1].build(node, a2, node.goal_locations[a2].size());
+	// // constraints[0].build(node, a1, search_engines[a1]->goal_location.size());
+	// // constraints[1].build(node, a2, search_engines[a2]->goal_location.size());
+	// CBS cbs(engines, constraints, initial_paths, heuristics_type::CG, screen);
+	// cbs.setPrioritizeConflicts(PC);
+	// cbs.setDisjointSplitting(disjoint_splitting);
+	// cbs.setBypass(false); // I guess that bypassing does not help two-agent path finding???
+	// cbs.setRectangleReasoning(rectangle_reasoning);
+	// cbs.setCorridorReasoning(corridor_reasoning);
+	// cbs.setTargetReasoning(target_reasoning);
+	// cbs.setMutexReasoning(mutex_reasoning);
+	// cbs.setConflictSelectionRule(conflict_seletion_rule);
+	// cbs.setNodeSelectionRule(node_selection_rule);
+	// cbs.setNodeLimit(node_limit);
 
-	double runtime = (double) (clock() - start_time) / CLOCKS_PER_SEC;
-	int root_g = (int) initial_paths[0].size() - 1 + (int) initial_paths[1].size() - 1;
-	int lowerbound = root_g;
-	int upperbound = MAX_COST;
-	if (cardinal)
-		lowerbound += 1;
-	cbs.solve(time_limit - runtime, lowerbound, upperbound);
-	num_solve_2agent_problems++;
-	int rst;
-	if (cbs.runtime > time_limit - runtime || cbs.num_HL_expanded > node_limit) // time out or node out
-		rst = (int) cbs.min_f_val - root_g; // using lowerbound to approximate
-	else if (cbs.solution_cost < 0) // no solution
-		rst = MAX_COST;
-	else
-	{
-		rst = cbs.solution_cost - root_g;
-	}
-	assert(rst >= 0);
+	// double runtime = (double) (clock() - start_time) / CLOCKS_PER_SEC;
+	// int root_g = (int) initial_paths[0].size() - 1 + (int) initial_paths[1].size() - 1;
+	// int lowerbound = root_g;
+	// int upperbound = MAX_COST;
+	// if (cardinal)
+	// 	lowerbound += 1;
+	// cbs.solve(time_limit - runtime, lowerbound, upperbound);
+	// num_solve_2agent_problems++;
+	int rst = -1;
+	// if (cbs.runtime > time_limit - runtime || cbs.num_HL_expanded > node_limit) // time out or node out
+	// 	rst = (int) cbs.min_f_val - root_g; // using lowerbound to approximate
+	// else if (cbs.solution_cost < 0) // no solution
+	// 	rst = MAX_COST;
+	// else
+	// {
+	// 	rst = cbs.solution_cost - root_g;
+	// }
+	// assert(rst >= 0);
 	return rst;
 }

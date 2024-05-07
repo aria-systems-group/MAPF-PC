@@ -80,7 +80,7 @@ public:
 
 	string getName() const { return "MLAStar"; }
 
-	MultiLabelSpaceTimeAStar(const Instance& instance, int agent) :
+	MultiLabelSpaceTimeAStar(Instance& instance, int agent) :
 			SingleAgentSolver(instance, agent) {}
 
 	Path findPathSegment(ConstraintTable& constraint_table, int start_time, int stage, int lowerbound, const vector<int>& goals);

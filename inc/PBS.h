@@ -13,7 +13,7 @@ public:
   // Runs the algorithm until the problem is solved or time is exhausted
   bool solve(double time_limit, int cost_lowerbound = 0, int cost_upperbound = MAX_COST);
 
-  PBS(const Instance& instance, int screen);
+  PBS(Instance& instance, int screen);
   // PBS(vector<SingleAgentSolver*>& search_engines,
   //   const vector<ConstraintTable>& constraints,
   //     vector<Path>& paths_found_initially, heuristics_type heuristic, int screen);
@@ -80,7 +80,7 @@ public:
   // Runs the algorithm until the problem is solved or time is exhausted
   bool solve(double time_limit, int cost_lowerbound = 0, int cost_upperbound = MAX_COST);
 
-  PBS_naive(const Instance& instance, int screen);
+  PBS_naive(Instance& instance, int screen);
   // PBS(vector<SingleAgentSolver*>& search_engines,
   //   const vector<ConstraintTable>& constraints,
   //     vector<Path>& paths_found_initially, heuristics_type heuristic, int screen);

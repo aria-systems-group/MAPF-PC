@@ -16,17 +16,21 @@ private:
   CBSNode* prev_parent= nullptr;
   distance_matrix_t dm_parent;
 
-	const vector<ConstraintTable>& initial_constraints;
+	// const vector<ConstraintTable>& initial_constraints;
 	const vector<SingleAgentSolver*>& search_engines;
 
 public:
 
 	double accumulated_runtime = 0;  // runtime of building MDDs
 
+  // STPHelper(const vector<ConstraintTable>& initial_constraints,
+  //           const vector<SingleAgentSolver*>& search_engines):
+  //   tp(),
+  //   initial_constraints(initial_constraints), search_engines(search_engines) {}
   STPHelper(const vector<ConstraintTable>& initial_constraints,
             const vector<SingleAgentSolver*>& search_engines):
     tp(),
-    initial_constraints(initial_constraints), search_engines(search_engines) {}
+    search_engines(search_engines) {}
 
 
   void set_flag(bool flag){ enabled = flag; };

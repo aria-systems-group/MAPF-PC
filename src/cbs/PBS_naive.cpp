@@ -455,7 +455,7 @@ bool PBS_naive::generateRoot()
   topological_sort(adj_list, planning_order);
 
   // initialize paths_found_initially
-  paths_found_initially.resize(num_of_agents, Path());
+  dummy_start->paths_found_initially.resize(num_of_agents, Path());
 
   dummy_start -> is_solution = true;
   for (auto i : planning_order)
@@ -470,13 +470,13 @@ bool PBS_naive::generateRoot()
       build_ct(ct, i, adj_list_r);
 
       // TODO lowerbound ????
-      paths_found_initially[i] = search_engines[i] ->findPath(*dummy_start, ct, paths, i, 0);
-      if (paths_found_initially[i].empty())
+      dummy_start->paths_found_initially[i] = search_engines[i] ->findPath(*dummy_start, ct, paths, i, 0);
+      if (dummy_start->paths_found_initially[i].empty())
         {
           cout << "No path exists for agent " << agent << endl;
           return false;
         }
-      paths[i] = &paths_found_initially[i];
+      paths[i] = &(dummy_start->paths_found_initially[i]);
 
       bool conflict_found = false;
 
@@ -495,7 +495,7 @@ bool PBS_naive::generateRoot()
         }
       }
 
-      dummy_start->makespan = max(dummy_start->makespan, paths_found_initially[i].size() - 1);
+      dummy_start->makespan = max(dummy_start->makespan, dummy_start->paths_found_initially[i].size() - 1);
       // dummy_start->g_val += (int) paths_found_initially[i].size() - 1;
       num_LL_expanded += search_engines[agent]->num_expanded;
       num_LL_generated += search_engines[agent]->num_generated;
@@ -503,7 +503,7 @@ bool PBS_naive::generateRoot()
     }
 
   for (int i = 0; i < num_of_agents; i++){
-    paths[i] = &paths_found_initially[i];
+    paths[i] = &(dummy_start->paths_found_initially[i]);
   }
 
   // generate dummy start and update data structures
@@ -606,7 +606,7 @@ bool PBS_naive::findOneConflict(int a1, int a2){
 
 
 
-PBS_naive::PBS_naive(const Instance& instance, int screen):
+PBS_naive::PBS_naive(Instance& instance, int screen):
 CBS(instance, false, heuristics_type::ZERO, screen)
 {
   this->screen = screen;

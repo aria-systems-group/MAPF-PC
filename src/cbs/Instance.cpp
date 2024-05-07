@@ -25,6 +25,9 @@ Instance::Instance(const int num_agents, const int num_cols, const int num_rows,
 	}
 	// JK: moved goal_locations to CBSNode for my planning framework
 	// goal_locations.resize(num_of_agents);
+
+	for (int i = 0; i < map_size; i++)
+		label_map[i] = {};
 }
 
 void Instance::SetStartForAgentIndex(int idx, int start)
@@ -431,7 +434,7 @@ void Instance::saveAgents() const
 list<int> Instance::getNeighbors(int curr) const
 {
 	list<int> neighbors;
-	int candidates[4] = { curr + 1, curr - 1, curr + num_of_cols, curr - num_of_cols };
+	int candidates[4] = {curr + 1, curr - 1, curr + num_of_cols, curr - num_of_cols };
 	for (int next : candidates)
 	{
 		if (validMove(curr, next))

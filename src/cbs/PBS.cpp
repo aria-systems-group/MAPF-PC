@@ -56,7 +56,7 @@ inline bool PBS::is_task_a_final_one(int task){
 inline void PBS::updatePaths(CBSNode* curr)
 {
   for (int i = 0; i < num_of_tasks; i++)
-		paths[i] = &paths_found_initially[i];
+		paths[i] = &(curr->paths_found_initially[i]);
 	vector<bool> updated(num_of_tasks, false);  // initialized for false
 
 	while (curr != nullptr)
@@ -74,7 +74,7 @@ inline void PBS::updatePaths(CBSNode* curr)
 }
 
 
-PBS::PBS(const Instance& instance, int screen):
+PBS::PBS(Instance& instance, int screen):
 CBS(instance, false, heuristics_type::ZERO, screen)
 {
   this->screen = screen;
@@ -508,7 +508,7 @@ bool PBS::generateRoot()
 
 
   // initialize paths_found_initially
-  paths_found_initially.resize(num_of_tasks, Path());
+  dummy_start->paths_found_initially.resize(num_of_tasks, Path());
 
   dummy_start -> is_solution = true;
   for (auto i : planning_order)
@@ -519,8 +519,8 @@ bool PBS::generateRoot()
       tie(agent, task) = id2task[i];
       int start_time = 0;
       if (task != 0){
-        assert(!paths_found_initially[task2id({agent, task - 1})].empty());
-        start_time = paths_found_initially[task2id({agent, task - 1})].end_time();
+        assert(!dummy_start->paths_found_initially[task2id({agent, task - 1})].empty());
+        start_time = dummy_start->paths_found_initially[task2id({agent, task - 1})].end_time();
       }
 
       cout << "plan for " << agent << "(" << task << ")"<< endl;
@@ -529,12 +529,12 @@ bool PBS::generateRoot()
 
       // JK: commenting out because i do not want to use PBS
       // paths_found_initially[i] = search_engines[agent]->findPathSegment(ct, start_time, task, 0);
-      if (paths_found_initially[i].empty())
+      if (dummy_start->paths_found_initially[i].empty())
         {
           cout << "No path exists for agent " << agent << "(" << task << ")" << endl;
           return false;
         }
-      paths[i] = &paths_found_initially[i];
+      paths[i] = &(dummy_start->paths_found_initially[i]);
 
       auto high_prio_agents = reachable_set(i, adj_list_r);
       high_prio_agents.erase(i);
@@ -571,7 +571,7 @@ bool PBS::generateRoot()
     }
 
   for (int i = 0; i < num_of_tasks; i++){
-    paths[i] = &paths_found_initially[i];
+    paths[i] = &(dummy_start->paths_found_initially[i]);
   }
 
   // generate dummy start and update data structures

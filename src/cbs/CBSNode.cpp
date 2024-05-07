@@ -8,6 +8,11 @@ void CBSNode::clear()
 	conflictGraph.clear();
 }
 
+void CBSNode::updateStagePropMap(int agent, Instance& instance) const
+{
+	instance.robot_i_unallowed_props_per_stage = unallowed_props_maps[agent];
+}
+
 void CBSNode::printConflictGraph(int num_of_agents) const
 {
 	if (conflictGraph.empty())
