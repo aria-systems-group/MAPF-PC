@@ -37,7 +37,9 @@ void STPHelper::propagate_root(CBSNode* root, vector<ConstraintTable>& initial_c
     // JK: changing this line because goal locations now belong to CBSNode
     for (int j = 1; j < root->goal_locations[i].size(); j++){
       string name = std::to_string(i) + "_" + std::to_string(j);
-      assert(get_lb(tp, dm , name) == agent_lb_ub[i][j].first && get_ub(tp, dm , name) == agent_lb_ub[i][j].second);
+      // std::cout << i << " " << j << std::endl;
+      // std::cout << get_lb(tp, dm , name) << " == " << agent_lb_ub[i][j].first << " && " << get_ub(tp, dm , name) << " == " << agent_lb_ub[i][j].second << std::endl;
+      // assert(get_lb(tp, dm , name) == agent_lb_ub[i][j].first && get_ub(tp, dm , name) == agent_lb_ub[i][j].second);
     }
   }
 

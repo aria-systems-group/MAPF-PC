@@ -2,8 +2,15 @@
 
 #include "common.h"
 
+// chooses smallest first
+enum conflict_type {MUTEX, TARGET, CORRIDOR, RECTANGLE, STANDARD, TEMPORAL, TRACE, TYPE_COUNT };
 
-enum conflict_type {TEMPORAL, MUTEX, TARGET, CORRIDOR, RECTANGLE, STANDARD, TYPE_COUNT };
+// enum conflict_type {TEMPORAL, STANDARD, TRACE, MUTEX, TARGET, CORRIDOR, RECTANGLE, TYPE_COUNT};
+// enum conflict_type {TEMPORAL, TRACE, STANDARD, MUTEX, TARGET, CORRIDOR, RECTANGLE, TYPE_COUNT};
+// enum conflict_type {STANDARD, TEMPORAL, TRACE, MUTEX, TARGET, CORRIDOR, RECTANGLE, TYPE_COUNT};
+// enum conflict_type {STANDARD, TRACE, TEMPORAL, MUTEX, TARGET, CORRIDOR, RECTANGLE, TYPE_COUNT};
+// enum conflict_type {TRACE, STANDARD, TEMPORAL, MUTEX, TARGET, CORRIDOR, RECTANGLE, TYPE_COUNT};
+// enum conflict_type {TEMPORAL, TRACE, STANDARD, MUTEX, TARGET, CORRIDOR, RECTANGLE, TYPE_COUNT};
 
 enum conflict_priority { CARDINAL, PSEUDO_CARDINAL, SEMI, NON, UNKNOWN, PRIORITY_COUNT };
 // Pseudo-cardinal conflicts are semi-/non-cardinal conflicts between dependent agents.
@@ -40,6 +47,7 @@ public:
 	int a2;
 	list<Constraint> constraint1;
 	list<Constraint> constraint2;
+	vector<Constraint> trace_constraints;
 	conflict_type type;
 	conflict_priority priority = conflict_priority::UNKNOWN;
 	double secondary_priority = 0; // used as the tie-breaking criteria for conflict selection
@@ -144,7 +152,7 @@ public:
 		this->a1 = a1;
 		this->a2 = a2;
 		type = conflict_type::TEMPORAL;
-		priority = conflict_priority::CARDINAL;
+		// priority = conflict_priority::CARDINAL;
 		this->constraint1.emplace_back(a1, i1, -1, t1 - 1, constraint_type::LEQSTOP); // item (2) part 2
 		this->constraint1.emplace_back(a2, i2, -1, t1, constraint_type::LEQSTOP); // item (1)
 		this->constraint2.emplace_back(a2, i2, -1, t1, constraint_type::GSTOP); // item (2) part 1
@@ -155,14 +163,19 @@ public:
 		This does not break completeness because (unlike all other types of conflict), trace conflicts are caused 
 		by only a single agent (i.e. they do not require 2 agents/paths to be fully defined)
   */
-  void traceConflict(int a1, int v, int t)
+  void traceConflict(vector<int> locations, vector<int> timestamps)
 	{
-		constraint1.clear();
-		constraint2.clear();
-		this->a1 = a1;
-		this->a2 = -1; // non-existent
-		this->constraint1.emplace_back(a1, v, -1, t, constraint_type::VERTEX);
-		type = conflict_type::STANDARD; // we might be able to resolve trace conflicts by taking a slightly different path (but probably not)
+		type = conflict_type::TRACE;
+		for (int i = 0; i < locations.size(); i++)
+			trace_constraints.emplace_back(i, locations[i], -1, timestamps[i], constraint_type::VERTEX);
+
+		// constraint1.clear();
+		// constraint2.clear();
+		// this->a1 = a1;
+		// this->a2 = -1; // non-existent
+		// this->constraint1.emplace_back(a1, v, -1, t, constraint_type::VERTEX);
+		// type = conflict_type::TRACE; // we might be able to resolve trace conflicts by taking a slightly different path (but probably not)
+
 	}
 
   void priorityConflict(int a1, int a2)

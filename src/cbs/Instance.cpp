@@ -21,7 +21,10 @@ Instance::Instance(const int num_agents, const int num_cols, const int num_rows,
 	{
 		bool succ = addObstacle(o);
 		if (!succ)
+		{
+			std::cout << o << std::endl;
 			throw std::runtime_error("Unable to create obstacle!");
+		}
 	}
 	// JK: moved goal_locations to CBSNode for my planning framework
 	// goal_locations.resize(num_of_agents);

@@ -63,6 +63,10 @@ public:
 	list<pair<int, Path>> paths; // new paths
 	list<Constraint> constraints; // new constraints
 
+	std::vector<std::vector<int>> trace;
+	std::vector<int> dfa_path;
+
+
 
 	// JK: see instance for details on why these are here 
   	// vector<TemporalEdge> temporal_cons;

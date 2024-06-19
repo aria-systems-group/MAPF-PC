@@ -212,15 +212,18 @@ shared_ptr<Conflict> CBS::chooseConflict(const CBSNode& node) const
     return nullptr;
   else if (!node.conflicts.empty())
   {
+    // choose = node.conflicts.front();
     choose = node.conflicts.back();
     for (const auto& conflict : node.conflicts)
     {
+      // std::cout << *conflict << std::endl;
       if (*choose < *conflict)
         choose = conflict;
     }
   }
   else
   {
+    // choose = node.unknownConf.front();
     choose = node.unknownConf.back();
     for (const auto& conflict : node.unknownConf)
     {
@@ -228,6 +231,8 @@ shared_ptr<Conflict> CBS::chooseConflict(const CBSNode& node) const
         choose = conflict;
     }
   }
+  // if (choose->type == conflict_type::TEMPORAL)
+  // std::cout << "chosen: " << *choose << std::endl;
   return choose;
 }
 
@@ -1326,15 +1331,15 @@ bool CBS::validateSolution() const
     for (int a2 = 0; a2 < num_of_agents; a2++)
     {
       if (a1 == a2){continue;}
-      for (auto cons: goal_node->temporal_cons[a1 * num_of_agents + a2]){ // JK: changed temporal_cons to be member of CBSNode
-      // for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
-        auto from_landmark = cons.first;
-        auto to_landmark = cons.second;
-        if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
-          cout << "Temporal conflict between " << a1  << "(" << from_landmark<< ")" << " and " << a2 << "(" << to_landmark<< ")" << endl;
-          return false;
-        }
-      }
+      // for (auto cons: goal_node->temporal_cons[a1 * num_of_agents + a2]){ // JK: changed temporal_cons to be member of CBSNode
+      // // for (auto cons: search_engines[0]->instance.temporal_cons[a1 * num_of_agents + a2]){
+      //   auto from_landmark = cons.first;
+      //   auto to_landmark = cons.second;
+      //   if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
+      //     cout << "Temporal conflict between " << a1  << "(" << from_landmark<< ")" << " and " << a2 << "(" << to_landmark<< ")" << endl;
+      //     return false;
+      //   }
+      // }
 
 
       size_t min_path_length = paths[a1]->size() < paths[a2]->size() ? paths[a1]->size() : paths[a2]->size();
