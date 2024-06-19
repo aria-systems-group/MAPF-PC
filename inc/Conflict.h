@@ -133,20 +133,20 @@ public:
 		// TODO add constraints from mutex reasoning
 	}
 
-  // time of a1 should be smaller than a2
-  // however, t1 >= t2
-  /* JK: This is how it is used
-  auto from_landmark = cons.first; // JK: this is an index, not an actual goal location!
-  auto to_landmark = cons.second; // JK: same as above
-  if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
-    // cout << "Temporal conflict between " << a1  << "(" << from_landmark<< ")" << " and " << a2 << "(" << to_landmark<< ")" << endl;
-    shared_ptr<Conflict> conflict(new Conflict());
-    conflict->temporalConflict(a1, a2, from_landmark, to_landmark, paths[a1]->timestamps[from_landmark], paths[a2]->timestamps[to_landmark]);
-    curr.conflicts.push_back(conflict);
-  }
-  */
-  void temporalConflict(int a1, int a2, int i1, int i2, int t1, int t2)
-  {
+    // time of a1 should be smaller than a2
+    // however, t1 >= t2
+    /* JK: This is how it is used
+    auto from_landmark = cons.first; // JK: this is an index, not an actual goal location!
+    auto to_landmark = cons.second; // JK: same as above
+    if (paths[a1]->timestamps[from_landmark] >= paths[a2]->timestamps[to_landmark]){
+      // cout << "Temporal conflict between " << a1  << "(" << from_landmark<< ")" << " and " << a2 << "(" << to_landmark<< ")" << endl;
+      shared_ptr<Conflict> conflict(new Conflict());
+      conflict->temporalConflict(a1, a2, from_landmark, to_landmark, paths[a1]->timestamps[from_landmark], paths[a2]->timestamps[to_landmark]);
+      curr.conflicts.push_back(conflict);
+    }
+    */
+    void temporalConflict(int a1, int a2, int i1, int i2, int t1, int t2)
+    {
 		constraint1.clear();
 		constraint2.clear();
 		this->a1 = a1;
@@ -156,14 +156,14 @@ public:
 		this->constraint1.emplace_back(a1, i1, -1, t1 - 1, constraint_type::LEQSTOP); // item (2) part 2
 		this->constraint1.emplace_back(a2, i2, -1, t1, constraint_type::LEQSTOP); // item (1)
 		this->constraint2.emplace_back(a2, i2, -1, t1, constraint_type::GSTOP); // item (2) part 1
-  }
+    }
 
-  /* 
+    /* 
 		JK: A trace conflict is basically a vertex conflict except it only results in a single agent being constrained. 
 		This does not break completeness because (unlike all other types of conflict), trace conflicts are caused 
 		by only a single agent (i.e. they do not require 2 agents/paths to be fully defined)
-  */
-  void traceConflict(vector<int> locations, vector<int> timestamps)
+    */
+    void traceConflict(vector<int> locations, vector<int> timestamps)
 	{
 		type = conflict_type::TRACE;
 		for (int i = 0; i < locations.size(); i++)
@@ -175,8 +175,23 @@ public:
 		// this->a2 = -1; // non-existent
 		// this->constraint1.emplace_back(a1, v, -1, t, constraint_type::VERTEX);
 		// type = conflict_type::TRACE; // we might be able to resolve trace conflicts by taking a slightly different path (but probably not)
-
 	}
+
+    void dumb_conflict(vector<Path*>& paths)
+    {
+        /*
+            Dumb conflict basically adds a constraint for every single vertex, time point in the plan (including every agent)
+        */
+        type = conflict_type::TRACE;
+        for (int i = 0; i < paths.size(); i++)
+        {
+            for (size_t k = 0; k < paths[i]->size(); k++)
+            {
+                trace_constraints.emplace_back(i, paths[i]->at(k).location, -1, k, constraint_type::VERTEX);
+            }
+        }
+    }
+
 
   void priorityConflict(int a1, int a2)
   {

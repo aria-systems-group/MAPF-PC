@@ -156,10 +156,6 @@ Path MultiLabelSpaceTimeAStar::findShortestPath(ConstraintTable& constraint_tabl
           timestamps.push_back(curr->g_val + 1);
         }
       }
-      // else if (next_location == (unsigned int)goals[stage] && constraint_table.g_goal_time[stage] > curr->g_val)
-      // 	continue; // JK: do not want to go into any goal region until we *actually* reach it
-      // else if (next_location != (unsigned int)goals[stage] && !instance.isLocationAllowed(next_location, stage))
-      // 	continue; // JK: if next_location is not a goal, then we cannot be inside any labeled region
 
 			int next_internal_conflicts = curr->num_of_conflicts +
 										  constraint_table.getNumOfConflictsForStep(curr->location, next_location, next_timestep);
